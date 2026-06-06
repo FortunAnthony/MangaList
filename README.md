@@ -1,16 +1,1 @@
 # MangaList
-PERSONAL LIBRARY
-MANGA TRACKER
-LOADING...
-0
-Reading
-0
-Up Next
-0
-Queue Done
-0
-Completed
-📖 READING
-🗂 QUEUE
-✅ COMPLETED
-
