@@ -10,13 +10,13 @@
     --ink: #0a0a0f;
     --paper: #f5f0e8;
     --red: #c0392b;
+    --blue: #3498db;
     --gold: #d4a017;
     --panel-bg: #1a1a24;
     --panel-light: #242436;
     --text-light: #e8e0d0;
     --text-dim: #7a7468;
     --green: #2ecc71;
-    --blue: #3498db;
     --orange: #e67e22;
   }
 
@@ -60,7 +60,7 @@
     font-size: 11px;
     letter-spacing: 6px;
     text-transform: uppercase;
-    color: var(--red);
+    color: var(--blue);
     margin-bottom: 8px;
   }
 
@@ -70,7 +70,7 @@
     letter-spacing: 4px;
     line-height: 0.9;
     color: var(--paper);
-    text-shadow: 4px 4px 0 var(--red);
+    text-shadow: 4px 4px 0 var(--blue);
   }
 
   .header-sub {
@@ -109,10 +109,9 @@
     margin-bottom: 2px;
   }
 
-  .stat-pill.red span { color: var(--red); }
-  .stat-pill.gold span { color: var(--gold); }
   .stat-pill.green span { color: var(--green); }
-  .stat-pill.blue span { color: var(--blue); }
+  .stat-pill.gold span  { color: var(--gold); }
+  .stat-pill.blue span  { color: var(--blue); }
 
   .tabs {
     display: flex;
@@ -139,7 +138,7 @@
     transition: all 0.2s;
   }
 
-  .tab.active { background: var(--red); color: white; }
+  .tab.active { background: var(--blue); color: white; }
   .tab:hover:not(.active) { background: rgba(255,255,255,0.05); color: var(--text-light); }
 
   .section { display: none; }
@@ -155,7 +154,7 @@
 
   .progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, var(--red), var(--gold));
+    background: linear-gradient(90deg, var(--blue), var(--gold));
     border-radius: 3px;
     transition: width 0.4s ease;
   }
@@ -188,7 +187,7 @@
     position: absolute;
     left: 0; top: 0; bottom: 0;
     width: 3px;
-    background: var(--red);
+    background: var(--blue);
     opacity: 0;
     transition: opacity 0.15s;
   }
@@ -196,17 +195,11 @@
   .manga-card:hover { background: var(--panel-light); border-color: rgba(255,255,255,0.12); }
   .manga-card:hover::before { opacity: 1; }
 
-  /* Status variants */
-  .manga-card.status-ongoing::before  { background: var(--gold);  opacity: 1; }
-  .manga-card.status-ended::before    { background: var(--green); opacity: 1; }
-  .manga-card.status-completed-read::before { background: var(--green); opacity: 1; }
-  .manga-card.completed-card::before  { background: var(--green); opacity: 1; }
-
-  /* Main-read card gets a gold top border as extra accent */
-  .manga-card.is-main {
-    border-top: 2px solid rgba(212,160,23,0.4);
-  }
-  .manga-card.is-main::before { background: var(--gold); opacity: 1; }
+  .manga-card.status-ongoing::before { background: var(--gold);  opacity: 1; }
+  .manga-card.status-ended::before   { background: var(--green); opacity: 1; }
+  .manga-card.completed-card::before { background: var(--green); opacity: 1; }
+  .manga-card.is-main                { border-top: 2px solid rgba(212,160,23,0.4); }
+  .manga-card.is-main::before        { background: var(--gold); opacity: 1; }
 
   .drag-handle {
     cursor: grab;
@@ -220,15 +213,8 @@
   }
   .drag-handle:active { cursor: grabbing; }
 
-  .manga-card.dragging {
-    opacity: 0.4;
-    border: 1px dashed rgba(255,255,255,0.2);
-  }
-
-  .manga-card.drag-over {
-    border-color: var(--gold);
-    background: rgba(212,160,23,0.08);
-  }
+  .manga-card.dragging  { opacity: 0.4; border: 1px dashed rgba(255,255,255,0.2); }
+  .manga-card.drag-over { border-color: var(--gold); background: rgba(212,160,23,0.08); }
 
   .num {
     font-family: 'Bebas Neue', sans-serif;
@@ -290,27 +276,12 @@
     line-height: 1;
   }
 
-  .card-btn:hover          { background: rgba(255,255,255,0.12); color: var(--text-light); }
+  .card-btn:hover            { background: rgba(255,255,255,0.12); color: var(--text-light); }
   .card-btn.btn-green:hover  { background: rgba(46,204,113,0.15);  border-color: var(--green);  color: var(--green); }
   .card-btn.btn-blue:hover   { background: rgba(52,152,219,0.15);  border-color: var(--blue);   color: var(--blue); }
   .card-btn.btn-orange:hover { background: rgba(230,126,34,0.15);  border-color: var(--orange); color: var(--orange); }
   .card-btn.btn-red:hover    { background: rgba(192,57,43,0.15);   border-color: var(--red);    color: var(--red); }
   .card-btn.btn-gold:hover   { background: rgba(212,160,23,0.15);  border-color: var(--gold);   color: var(--gold); }
-
-  .status-dot {
-    width: 9px; height: 9px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .status-dot.ongoing        { background: var(--gold);  box-shadow: 0 0 6px var(--gold);  animation: pulse 2s infinite; }
-  .status-dot.ended          { background: var(--green); box-shadow: 0 0 6px var(--green); }
-  .status-dot.completed-read { background: var(--green); box-shadow: 0 0 6px var(--green); }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.35; }
-  }
 
   .status-badge {
     font-size: 9px;
@@ -319,15 +290,41 @@
     padding: 2px 7px;
     border-radius: 2px;
     font-weight: 700;
-    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
   }
 
-  /* Ended is now green */
-  .badge-ongoing        { background: rgba(212,160,23,0.15); color: var(--gold);  border: 1px solid rgba(212,160,23,0.25); }
-  .badge-ended          { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.25); }
-  .badge-completed-read { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.25); }
+  .badge-ongoing {
+    background: rgba(212,160,23,0.15);
+    color: var(--gold);
+    border: 1px solid rgba(212,160,23,0.25);
+  }
+  .badge-ongoing:hover {
+    background: rgba(46,204,113,0.15);
+    color: var(--green);
+    border-color: rgba(46,204,113,0.25);
+  }
+  .badge-ended {
+    background: rgba(46,204,113,0.15);
+    color: var(--green);
+    border: 1px solid rgba(46,204,113,0.25);
+  }
+  .badge-ended:hover {
+    background: rgba(212,160,23,0.15);
+    color: var(--gold);
+    border-color: rgba(212,160,23,0.25);
+  }
 
-  /* Add form */
+  .status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .status-dot.ongoing { background: var(--gold);  box-shadow: 0 0 6px var(--gold);  animation: pulse 2s infinite; }
+  .status-dot.ended   { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
   .add-form {
     background: var(--panel-bg);
     border: 1px solid rgba(255,255,255,0.08);
@@ -378,7 +375,7 @@
   .add-select option { background: var(--panel-bg); }
 
   .add-btn {
-    background: var(--red);
+    background: var(--blue);
     border: none;
     border-radius: 4px;
     color: white;
@@ -399,7 +396,6 @@
     margin-top: 3px;
   }
 
-  /* Modal */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -420,7 +416,6 @@
     width: 100%;
     max-width: 360px;
   }
-
   .modal h3 {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
@@ -428,14 +423,12 @@
     margin-bottom: 6px;
     color: var(--paper);
   }
-
   .modal p {
     font-size: 12px;
     color: var(--text-dim);
     margin-bottom: 16px;
     letter-spacing: 0.5px;
   }
-
   .modal-input {
     width: 100%;
     background: var(--panel-light);
@@ -451,7 +444,6 @@
   .modal-input:focus { border-color: rgba(255,255,255,0.25); }
 
   .modal-btns { display: flex; gap: 8px; }
-
   .modal-btn {
     flex: 1;
     padding: 10px;
@@ -486,7 +478,7 @@
     cursor: pointer;
     transition: all 0.15s;
   }
-  .reset-btn:hover { border-color: var(--red); color: var(--red); }
+  .reset-btn:hover { border-color: var(--blue); color: var(--blue); }
 </style>
 </head>
 <body>
@@ -498,7 +490,7 @@
     <p id="modalTitle">Moving to completed list</p>
     <input type="date" class="modal-input" id="modalDate">
     <div class="modal-btns">
-      <button class="modal-btn cancel"  onclick="closeModal()">Cancel</button>
+      <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
       <button class="modal-btn confirm" onclick="confirmComplete()">Confirm</button>
     </div>
   </div>
@@ -511,21 +503,23 @@
     <div class="header-sub" id="headerSub">Loading...</div>
   </header>
 
+  <!-- Stats: Completed | Queue | Reading -->
   <div class="stats-bar">
-    <div class="stat-pill red"><span  id="statReading">0</span>Reading</div>
-    <div class="stat-pill gold"><span id="statQueue">0</span>Queue</div>
     <div class="stat-pill green"><span id="statCompleted">0</span>Completed</div>
+    <div class="stat-pill gold"><span id="statQueue">0</span>Queue</div>
+    <div class="stat-pill blue"><span id="statReading">0</span>Reading</div>
   </div>
 
+  <!-- Tabs: Completed | Queue | Reading -->
   <div class="tabs">
+    <button class="tab" onclick="switchTab('completed', this)">✅ Completed</button>
+    <button class="tab" onclick="switchTab('future', this)">🗂 Queue</button>
     <button class="tab active" onclick="switchTab('reading', this)">📖 Reading</button>
-    <button class="tab"        onclick="switchTab('future',  this)">🗂 Queue</button>
-    <button class="tab"        onclick="switchTab('completed',this)">✅ Completed</button>
   </div>
 
-  <!-- READING -->
-  <div class="section active" id="tab-reading">
-    <div class="manga-list" id="list-reading"></div>
+  <!-- COMPLETED -->
+  <div class="section" id="tab-completed">
+    <div class="manga-list" id="list-completed"></div>
   </div>
 
   <!-- QUEUE -->
@@ -543,9 +537,7 @@
       </div>
       <div class="add-form-row2">
         <input class="add-input" id="addGenre" placeholder="Genre (e.g. Action / Romance)" style="flex:2" />
-        <select class="add-select" id="addPosition" style="flex:1">
-          <option value="end">End</option>
-        </select>
+        <select class="add-select" id="addPosition" style="flex:1"></select>
         <button class="add-btn" onclick="addToQueue()">Add</button>
       </div>
     </div>
@@ -557,99 +549,99 @@
     <div class="manga-list" id="list-future"></div>
   </div>
 
-  <!-- COMPLETED -->
-  <div class="section" id="tab-completed">
-    <div class="manga-list" id="list-completed"></div>
+  <!-- READING -->
+  <div class="section active" id="tab-reading">
+    <div class="manga-list" id="list-reading"></div>
   </div>
 </div>
 
 <script>
 // ── INITIAL DATA ──────────────────────────────────────────────
 const INITIAL_READING = [
-  { title: "Frieren: Beyond Journey's End",          status: "ongoing", isMain: true },
-  { title: "Blue Exorcist",                          status: "ongoing" },
-  { title: "Boruto: Two Blue Vortex",                status: "ongoing" },
-  { title: "Gal Yome no Himitsu",                    status: "ongoing" },
-  { title: "Ichi the Witch",                         status: "ongoing" },
-  { title: "Kagurabachi",                            status: "ongoing" },
-  { title: "Kurumizawa's Folly",                     status: "ongoing" },
-  { title: "One Piece",                              status: "ongoing" },
+  { title: "Sundome",                               status: "ongoing" },
+  { title: "Kagurabachi",                           status: "ongoing" },
+  { title: "Ichi the Witch",                        status: "ongoing" },
+  { title: "Spy × Family",                          status: "ongoing" },
+  { title: "One Piece",                             status: "ongoing" },
+  { title: "Boruto: Two Blue Vortex",               status: "ongoing" },
+  { title: "Gal Yome no Himitsu",                   status: "ongoing" },
+  { title: "Kurumizawa's Folly",                    status: "ongoing" },
   { title: "Re:Zero − Starting Life in Another World", status: "ongoing" },
-  { title: "Sakamoto Days",                          status: "ongoing" },
-  { title: "Spy × Family",                           status: "ongoing" },
-  { title: "Sundome",                                status: "ongoing" },
+  { title: "Blue Exorcist",                         status: "ongoing" },
+  { title: "Sakamoto Days",                         status: "ongoing" },
+  { title: "Frieren: Beyond Journey's End",         status: "ongoing", isMain: true },
 ];
 
 const INITIAL_QUEUE = [
-  { title: "The Apothecary Diaries",                              length: "medium",    genre: "Mystery / Historical" },
-  { title: "Yomi no Tsugai",                                      length: "short",     genre: "Fantasy / Action" },
-  { title: "My Dress-Up Darling",                                 length: "medium",    genre: "Romance / Slice of Life" },
-  { title: "Vinland Saga",                                        length: "long",      genre: "Historical / Action" },
-  { title: "Your Lie in April",                                   length: "short",     genre: "Drama / Romance" },
-  { title: "One-Punch Man",                                       length: "long",      genre: "Action / Comedy" },
+  { title: "The Apothecary Diaries",                         length: "medium",    genre: "Mystery / Historical" },
+  { title: "Yomi no Tsugai",                                 length: "short",     genre: "Fantasy / Action" },
+  { title: "My Dress-Up Darling",                            length: "medium",    genre: "Romance / Slice of Life" },
+  { title: "Vinland Saga",                                   length: "long",      genre: "Historical / Action" },
+  { title: "Your Lie in April",                              length: "short",     genre: "Drama / Romance" },
+  { title: "One-Punch Man",                                  length: "long",      genre: "Action / Comedy" },
   { title: "Campfire Cooking in Another World with My Absurd Skill", length: "medium", genre: "Isekai / Slice of Life" },
-  { title: "Attack on Titan",                                     length: "long",      genre: "Action / Horror" },
-  { title: "The Heiress and the Chauffeur",                       length: "short",     genre: "Romance / Drama" },
-  { title: "JoJo's Bizarre Adventure",                            length: "very-long", genre: "Action / Adventure" },
-  { title: "Witch Hat Atelier",                                   length: "medium",    genre: "Fantasy" },
-  { title: "Assassination Classroom",                             length: "medium",    genre: "Action / Comedy" },
-  { title: "2.5 Dimensional Seduction",                           length: "medium",    genre: "Romance / Slice of Life" },
-  { title: "Delicious in Dungeon",                                length: "medium",    genre: "Fantasy / Comedy" },
-  { title: "Hima-Ten!",                                           length: "short",     genre: "Romance / Comedy" },
-  { title: "Jujutsu Kaisen",                                      length: "long",      genre: "Action / Horror" },
-  { title: "Domestic Girlfriend",                                 length: "medium",    genre: "Romance / Drama" },
-  { title: "Tougen Anki",                                         length: "medium",    genre: "Action / Fantasy" },
-  { title: "I'm in Love with the Older Girl Next Door",           length: "short",     genre: "Romance / Slice of Life" },
-  { title: "Hunter × Hunter",                                     length: "long",      genre: "Action / Adventure" },
-  { title: "Trigun",                                              length: "medium",    genre: "Sci-Fi / Action" },
-  { title: "Rent-A-Girlfriend",                                   length: "long",      genre: "Romance / Comedy" },
-  { title: "Record of Ragnarok",                                  length: "medium",    genre: "Action / Mythology" },
-  { title: "Dandadan",                                            length: "medium",    genre: "Action / Sci-Fi / Romance" },
-  { title: "Nana to Kaoru",                                       length: "long",      genre: "Romance / Drama" },
-  { title: "Dragon Ball",                                         length: "long",      genre: "Action / Adventure" },
-  { title: "Bijin Onna Joushi Takizawa-san",                      length: "short",     genre: "Romance / Workplace" },
-  { title: "Barrage",                                             length: "short",     genre: "Sci-Fi / Action" },
-  { title: "Black Clover",                                        length: "long",      genre: "Action / Fantasy" },
-  { title: "Lone Wolf & Cub",                                     length: "long",      genre: "Historical / Action" },
-  { title: "Blue Kill",                                           length: "short",     genre: "Thriller / Action" },
-  { title: "Vagabond",                                            length: "long",      genre: "Historical / Action" },
-  { title: "Futari H",                                            length: "long",      genre: "Romance / Drama" },
-  { title: "The Elusive Samurai",                                 length: "medium",    genre: "Historical / Action" },
-  { title: "Berserk",                                             length: "long",      genre: "Dark Fantasy / Action" },
-  { title: "Four Knights of the Apocalypse",                      length: "medium",    genre: "Fantasy / Action" },
-  { title: "Blade of the Immortal",                               length: "long",      genre: "Historical / Action" },
-  { title: "Gonron Egg",                                          length: "short",     genre: "Unknown" },
-  { title: "Kingdom",                                             length: "very-long", genre: "Historical / Action" },
-  { title: "The Seven Deadly Sins",                               length: "long",      genre: "Fantasy / Action" },
-  { title: "Solo Leveling",                                       length: "medium",    genre: "Action / Fantasy" },
-  { title: "Jack of All Trades",                                  length: "medium",    genre: "Isekai / Action" },
-  { title: "Tomb Raider King",                                    length: "long",      genre: "Action / Fantasy" },
-  { title: "Ubel Blatt",                                          length: "long",      genre: "Dark Fantasy / Action" },
-  { title: "Lord of the Mysteries",                               length: "very-long", genre: "Mystery / Fantasy" },
-  { title: "JJK Modulo",                                          length: "short",     genre: "Action" },
-  { title: "Bleach",                                              length: "very-long", genre: "Action / Fantasy" },
+  { title: "Attack on Titan",                                length: "long",      genre: "Action / Horror" },
+  { title: "The Heiress and the Chauffeur",                  length: "short",     genre: "Romance / Drama" },
+  { title: "JoJo's Bizarre Adventure",                       length: "very-long", genre: "Action / Adventure" },
+  { title: "Witch Hat Atelier",                              length: "medium",    genre: "Fantasy" },
+  { title: "Assassination Classroom",                        length: "medium",    genre: "Action / Comedy" },
+  { title: "2.5 Dimensional Seduction",                      length: "medium",    genre: "Romance / Slice of Life" },
+  { title: "Delicious in Dungeon",                           length: "medium",    genre: "Fantasy / Comedy" },
+  { title: "Hima-Ten!",                                      length: "short",     genre: "Romance / Comedy" },
+  { title: "Jujutsu Kaisen",                                 length: "long",      genre: "Action / Horror" },
+  { title: "Domestic Girlfriend",                            length: "medium",    genre: "Romance / Drama" },
+  { title: "Tougen Anki",                                    length: "medium",    genre: "Action / Fantasy" },
+  { title: "I'm in Love with the Older Girl Next Door",      length: "short",     genre: "Romance / Slice of Life" },
+  { title: "Hunter × Hunter",                                length: "long",      genre: "Action / Adventure" },
+  { title: "Trigun",                                         length: "medium",    genre: "Sci-Fi / Action" },
+  { title: "Rent-A-Girlfriend",                              length: "long",      genre: "Romance / Comedy" },
+  { title: "Record of Ragnarok",                             length: "medium",    genre: "Action / Mythology" },
+  { title: "Dandadan",                                       length: "medium",    genre: "Action / Sci-Fi / Romance" },
+  { title: "Nana to Kaoru",                                  length: "long",      genre: "Romance / Drama" },
+  { title: "Dragon Ball",                                    length: "long",      genre: "Action / Adventure" },
+  { title: "Bijin Onna Joushi Takizawa-san",                 length: "short",     genre: "Romance / Workplace" },
+  { title: "Barrage",                                        length: "short",     genre: "Sci-Fi / Action" },
+  { title: "Black Clover",                                   length: "long",      genre: "Action / Fantasy" },
+  { title: "Lone Wolf & Cub",                                length: "long",      genre: "Historical / Action" },
+  { title: "Blue Kill",                                      length: "short",     genre: "Thriller / Action" },
+  { title: "Vagabond",                                       length: "long",      genre: "Historical / Action" },
+  { title: "Futari H",                                       length: "long",      genre: "Romance / Drama" },
+  { title: "The Elusive Samurai",                            length: "medium",    genre: "Historical / Action" },
+  { title: "Berserk",                                        length: "long",      genre: "Dark Fantasy / Action" },
+  { title: "Four Knights of the Apocalypse",                 length: "medium",    genre: "Fantasy / Action" },
+  { title: "Blade of the Immortal",                          length: "long",      genre: "Historical / Action" },
+  { title: "Gonron Egg",                                     length: "short",     genre: "Unknown" },
+  { title: "Kingdom",                                        length: "very-long", genre: "Historical / Action" },
+  { title: "The Seven Deadly Sins",                          length: "long",      genre: "Fantasy / Action" },
+  { title: "Solo Leveling",                                  length: "medium",    genre: "Action / Fantasy" },
+  { title: "Jack of All Trades",                             length: "medium",    genre: "Isekai / Action" },
+  { title: "Tomb Raider King",                               length: "long",      genre: "Action / Fantasy" },
+  { title: "Ubel Blatt",                                     length: "long",      genre: "Dark Fantasy / Action" },
+  { title: "Lord of the Mysteries",                          length: "very-long", genre: "Mystery / Fantasy" },
+  { title: "JJK Modulo",                                     length: "short",     genre: "Action" },
+  { title: "Bleach",                                         length: "very-long", genre: "Action / Fantasy" },
 ];
 
 const INITIAL_COMPLETED = [
-  { title: "Naruto",                              date: "" },
-  { title: "Boruto",                              date: "" },
-  { title: "Death Note",                          date: "" },
-  { title: "Demon Slayer: Kimetsu no Yaiba",      date: "" },
-  { title: "My Hero Academia",                    date: "" },
-  { title: "Star of Beethoven",                   date: "" },
-  { title: "Tokyo Ghoul",                         date: "" },
-  { title: "Yu-Gi-Oh!",                           date: "" },
+  { title: "Naruto",                               date: "" },
+  { title: "Boruto",                               date: "" },
+  { title: "Death Note",                           date: "" },
+  { title: "Demon Slayer: Kimetsu no Yaiba",       date: "" },
+  { title: "My Hero Academia",                     date: "" },
+  { title: "Star of Beethoven",                    date: "" },
+  { title: "Tokyo Ghoul",                          date: "" },
+  { title: "Yu-Gi-Oh!",                            date: "" },
   { title: "You and I Are Polar Opposites",        date: "" },
-  { title: "Astro Royale",                        date: "" },
-  { title: "Velvet Kiss",                         date: "" },
-  { title: "Fullmetal Alchemist",                 date: "" },
-  { title: "Ane Doki",                            date: "" },
-  { title: "Food Wars!: Shokugeki no Soma",       date: "" },
-  { title: "Shokugeki no Sanji",                  date: "" },
-  { title: "Romantic Killer",                     date: "" },
-  { title: "Dr. Stone",                           date: "" },
-  { title: "Show-ha Shoten!",                     date: "" },
-  { title: "OTR of the Flame",                    date: "" },
+  { title: "Astro Royale",                         date: "" },
+  { title: "Velvet Kiss",                          date: "" },
+  { title: "Fullmetal Alchemist",                  date: "" },
+  { title: "Ane Doki",                             date: "" },
+  { title: "Food Wars!: Shokugeki no Soma",        date: "" },
+  { title: "Shokugeki no Sanji",                   date: "" },
+  { title: "Romantic Killer",                      date: "" },
+  { title: "Dr. Stone",                            date: "" },
+  { title: "Show-ha Shoten!",                      date: "" },
+  { title: "OTR of the Flame",                     date: "" },
 ];
 
 // ── STATE ─────────────────────────────────────────────────────
@@ -665,18 +657,14 @@ function loadState() {
   };
 }
 
-function saveState() {
-  localStorage.setItem('mangaTrackerV3', JSON.stringify(state));
-}
+function saveState() { localStorage.setItem('mangaTrackerV3', JSON.stringify(state)); }
 
 let state = loadState();
 let modalPending = null;
-let dragSrcIdx    = null;
+let dragSrcIdx = null;
 
 // ── HELPERS ───────────────────────────────────────────────────
-function today() {
-  return new Date().toISOString().split('T')[0];
-}
+function today() { return new Date().toISOString().split('T')[0]; }
 
 function formatDate(d) {
   if (!d) return '';
@@ -688,14 +676,10 @@ function formatDate(d) {
 
 function esc(str) { return str.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 
-// ── READING SORT ──────────────────────────────────────────────
-// Main read first, then alphabetical
 function sortedReading() {
-  return [...state.reading].sort((a, b) => {
-    if (a.isMain && !b.isMain) return -1;
-    if (!a.isMain && b.isMain) return  1;
-    return a.title.localeCompare(b.title);
-  });
+  const main = state.reading.filter(m => m.isMain);
+  const rest = state.reading.filter(m => !m.isMain).sort((a,b) => a.title.localeCompare(b.title));
+  return [...main, ...rest];
 }
 
 // ── MODAL ─────────────────────────────────────────────────────
@@ -714,7 +698,14 @@ function closeModal() {
 function confirmComplete() {
   if (!modalPending) return;
   const date = document.getElementById('modalDate').value;
+  // If this was main, promote next alphabetical as main
+  const wasMain = state.reading.find(m => m.title === modalPending && m.isMain);
   state.reading = state.reading.filter(m => m.title !== modalPending);
+  if (wasMain && state.reading.length) {
+    const sorted = [...state.reading].sort((a,b) => a.title.localeCompare(b.title));
+    const nextMain = state.reading.find(m => m.title === sorted[0].title);
+    if (nextMain) nextMain.isMain = true;
+  }
   state.completed.push({ title: modalPending, date });
   saveState();
   closeModal();
@@ -722,77 +713,89 @@ function confirmComplete() {
 }
 
 // ── READING ───────────────────────────────────────────────────
-function setReadingStatus(title, status) {
-  const m = state.reading.find(r => r.title === title);
-  if (m) { m.status = status; saveState(); renderReading(); updateStats(); }
-}
-
-function moveReadingToQueue(title) {
+function toggleStatus(title) {
   const m = state.reading.find(r => r.title === title);
   if (!m) return;
-  state.reading = state.reading.filter(r => r.title !== title);
-  state.queue.unshift({ title: m.title, length: 'medium', genre: 'Unknown' });
+  m.status = m.status === 'ongoing' ? 'ended' : 'ongoing';
   saveState();
-  renderAll();
+  renderReading();
 }
 
-function setAsMain(title) {
-  state.reading.forEach(r => r.isMain = false);
+function pinAsMain(title) {
+  state.reading.forEach(m => m.isMain = false);
   const m = state.reading.find(r => r.title === title);
   if (m) m.isMain = true;
   saveState();
   renderReading();
 }
 
+function moveReadingToQueue(title) {
+  const m = state.reading.find(r => r.title === title);
+  if (!m) return;
+  const wasMain = m.isMain;
+  state.reading = state.reading.filter(r => r.title !== title);
+  // Promote next if was main
+  if (wasMain && state.reading.length) {
+    const sorted = [...state.reading].sort((a,b) => a.title.localeCompare(b.title));
+    const nextMain = state.reading.find(r => r.title === sorted[0].title);
+    if (nextMain) nextMain.isMain = true;
+  }
+  state.queue.unshift({ title: m.title, length: 'medium', genre: 'Unknown' });
+  saveState();
+  renderAll();
+}
+
+function moveReadingToCompleted(title) { openModal(title); }
+
 function renderReading() {
   const el = document.getElementById('list-reading');
-  const sorted = sortedReading();
-
-  if (!sorted.length) {
+  const ordered = sortedReading();
+  if (!ordered.length) {
     el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:12px;letter-spacing:2px;text-transform:uppercase;">Nothing reading yet</div>';
     return;
   }
-
-  el.innerHTML = sorted.map(m => {
-    const statusLabel = m.status === 'ongoing' ? 'Ongoing'
-                      : m.status === 'ended'   ? 'Ended'
-                      :                          'Completed';
-    const badgeClass  = m.status === 'ongoing' ? 'badge-ongoing'
-                      : m.status === 'ended'   ? 'badge-ended'
-                      :                          'badge-completed-read';
-    const dotClass    = m.status || 'ongoing';
-    const mainClass   = m.isMain ? 'is-main' : '';
-    const mainBadge   = m.isMain ? '<span class="tag main-read">⭐ Main Read</span>' : '';
-    const pinBtn      = !m.isMain
-      ? `<button class="card-btn btn-gold" title="Set as Main Read" onclick="setAsMain('${esc(m.title)}')">⭐</button>`
-      : '';
-
+  el.innerHTML = ordered.map(m => {
+    const badgeClass = m.status === 'ongoing' ? 'badge-ongoing' : 'badge-ended';
+    const badgeLabel = m.status === 'ongoing' ? 'Ongoing' : 'Ended';
+    const dotClass   = m.status === 'ongoing' ? 'ongoing' : 'ended';
+    const cardClass  = `manga-card status-${m.status || 'ongoing'}${m.isMain ? ' is-main' : ''}`;
     return `
-    <div class="manga-card status-${m.status || 'ongoing'} ${mainClass}">
+    <div class="${cardClass}">
       <div class="status-dot ${dotClass}"></div>
       <div class="manga-info">
         <div class="manga-title">${m.title}</div>
         <div class="tags">
-          <span class="status-badge ${badgeClass}">${statusLabel}</span>
-          ${mainBadge}
+          <span class="status-badge ${badgeClass}" data-title="${esc(m.title)}">${badgeLabel}</span>
+          ${m.isMain ? '<span class="tag main-read">⭐ Main Read</span>' : ''}
         </div>
       </div>
       <div class="card-actions">
-        ${m.status !== 'ongoing' ? `<button class="card-btn btn-orange" title="Mark Ongoing" onclick="setReadingStatus('${esc(m.title)}','ongoing')">🟡</button>` : ''}
-        ${m.status !== 'ended'   ? `<button class="card-btn btn-orange" title="Mark Ended"   onclick="setReadingStatus('${esc(m.title)}','ended')">🔴</button>`   : ''}
-        ${pinBtn}
-        <button class="card-btn btn-green" title="Mark Completed"   onclick="openModal('${esc(m.title)}')">✓</button>
-        <button class="card-btn btn-red"   title="Move back to Queue" onclick="moveReadingToQueue('${esc(m.title)}')">↩</button>
+        <button class="card-btn btn-red"   title="Back to Queue"    data-action="toqueue"   data-title="${esc(m.title)}">↩</button>
+        <button class="card-btn btn-gold"  title="Set as Main Read" data-action="pinmain"   data-title="${esc(m.title)}">⭐</button>
+        <button class="card-btn btn-green" title="Mark Completed"   data-action="complete"  data-title="${esc(m.title)}">✓</button>
       </div>
     </div>`;
   }).join('');
+
+  // Attach events
+  el.querySelectorAll('.status-badge').forEach(badge => {
+    badge.addEventListener('click', () => toggleStatus(badge.dataset.title));
+  });
+  el.querySelectorAll('.card-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = btn.dataset.title;
+      if (btn.dataset.action === 'toqueue')  moveReadingToQueue(t);
+      if (btn.dataset.action === 'pinmain')  pinAsMain(t);
+      if (btn.dataset.action === 'complete') moveReadingToCompleted(t);
+    });
+  });
 }
 
 // ── QUEUE ─────────────────────────────────────────────────────
 function moveQueueToReading(idx) {
-  // New manga becomes the main read; clear all existing mains
-  state.reading.forEach(r => r.isMain = false);
   const m = state.queue[idx];
+  // New manga becomes main; demote current main
+  state.reading.forEach(r => r.isMain = false);
   state.reading.push({ title: m.title, status: 'ongoing', isMain: true });
   state.queue.splice(idx, 1);
   saveState();
@@ -809,7 +812,7 @@ function removeFromQueue(idx) {
 }
 
 function addToQueue() {
-  const title  = document.getElementById('addTitle').value.trim();
+  const title = document.getElementById('addTitle').value.trim();
   const length = document.getElementById('addLength').value;
   const genre  = document.getElementById('addGenre').value.trim() || 'Unknown';
   const pos    = document.getElementById('addPosition').value;
@@ -849,7 +852,7 @@ function renderQueue() {
   document.getElementById('progressLabel').textContent = `${state.queue.length} in queue`;
 
   el.innerHTML = state.queue.map((m, i) => `
-    <div class="manga-card" id="qcard-${i}">
+    <div class="manga-card" draggable="true" id="qcard-${i}">
       <div class="drag-handle" title="Drag to reorder">⠿</div>
       <div class="num">${i + 1}</div>
       <div class="manga-info">
@@ -860,86 +863,87 @@ function renderQueue() {
         </div>
       </div>
       <div class="card-actions">
-        <button class="card-btn btn-blue" title="Start Reading" onclick="moveQueueToReading(${i})">▶</button>
-        <button class="card-btn btn-red"  title="Remove"        onclick="removeFromQueue(${i})">✕</button>
+        <button class="card-btn btn-blue" title="Start Reading" data-action="start" data-idx="${i}">▶</button>
+        <button class="card-btn btn-red"  title="Remove"        data-action="remove" data-idx="${i}">✕</button>
       </div>
     </div>
   `).join('');
 
-  setupDragAndDrop();
-}
+  // Button events
+  el.querySelectorAll('.card-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      if (btn.dataset.action === 'start')  moveQueueToReading(idx);
+      if (btn.dataset.action === 'remove') removeFromQueue(idx);
+    });
+  });
 
-// ── DRAG & DROP (addEventListener-based) ─────────────────────
-function setupDragAndDrop() {
-  const cards = document.querySelectorAll('#list-future .manga-card');
-
-  cards.forEach((card, i) => {
-    card.setAttribute('draggable', 'true');
-
-    card.addEventListener('dragstart', function(e) {
+  // Drag & drop
+  el.querySelectorAll('.manga-card').forEach((card, i) => {
+    card.addEventListener('dragstart', e => {
       dragSrcIdx = i;
       e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', String(i));
-      // Slight delay so the drag ghost renders before we apply opacity
-      requestAnimationFrame(() => card.classList.add('dragging'));
+      setTimeout(() => card.classList.add('dragging'), 0);
     });
-
-    card.addEventListener('dragenter', function(e) {
-      e.preventDefault();
+    card.addEventListener('dragend', () => {
+      el.querySelectorAll('.manga-card').forEach(c => c.classList.remove('dragging','drag-over'));
+      dragSrcIdx = null;
     });
-
-    card.addEventListener('dragover', function(e) {
+    card.addEventListener('dragover', e => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      if (i !== dragSrcIdx) {
-        document.querySelectorAll('#list-future .manga-card').forEach(c => c.classList.remove('drag-over'));
-        card.classList.add('drag-over');
-      }
+      el.querySelectorAll('.manga-card').forEach(c => c.classList.remove('drag-over'));
+      if (i !== dragSrcIdx) card.classList.add('drag-over');
     });
-
-    card.addEventListener('dragleave', function(e) {
-      // Only remove if we've truly left this card (not just entered a child)
-      if (!card.contains(e.relatedTarget)) {
-        card.classList.remove('drag-over');
-      }
-    });
-
-    card.addEventListener('drop', function(e) {
+    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+    card.addEventListener('drop', e => {
       e.preventDefault();
-      e.stopPropagation();
       if (dragSrcIdx === null || dragSrcIdx === i) return;
-      const moved = state.queue.splice(dragSrcIdx, 1)[0];
-      state.queue.splice(i, 0, moved);
+      const item = state.queue.splice(dragSrcIdx, 1)[0];
+      state.queue.splice(i, 0, item);
       dragSrcIdx = null;
       saveState();
       renderQueue();
-    });
-
-    card.addEventListener('dragend', function() {
-      document.querySelectorAll('#list-future .manga-card').forEach(c => {
-        c.classList.remove('dragging', 'drag-over');
-      });
-      dragSrcIdx = null;
     });
   });
 }
 
 // ── COMPLETED ─────────────────────────────────────────────────
+function moveCompletedToReading(title) {
+  state.completed = state.completed.filter(m => m.title !== title);
+  state.reading.push({ title, status: 'ongoing', isMain: false });
+  saveState();
+  renderAll();
+}
+
+function sortedCompleted() {
+  const noDates = state.completed.filter(m => !m.date).sort((a,b) => a.title.localeCompare(b.title));
+  const dated   = state.completed.filter(m =>  m.date).sort((a,b) => a.date.localeCompare(b.date));
+  return [...noDates, ...dated];
+}
+
 function renderCompleted() {
   const el = document.getElementById('list-completed');
   if (!state.completed.length) {
     el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:12px;letter-spacing:2px;text-transform:uppercase;">Nothing completed yet</div>';
     return;
   }
-  el.innerHTML = [...state.completed].reverse().map(m => `
-    <div class="manga-card completed-card" style="cursor:default">
+  el.innerHTML = sortedCompleted().map(m => `
+    <div class="manga-card completed-card">
       <div style="font-size:16px;flex-shrink:0">✓</div>
       <div class="manga-info">
         <div class="manga-title">${m.title}</div>
         ${m.date ? `<div class="completed-date">Completed ${formatDate(m.date)}</div>` : ''}
       </div>
+      <div class="card-actions">
+        <button class="card-btn btn-blue" title="Move back to Reading" data-title="${esc(m.title)}">↩ Reading</button>
+      </div>
     </div>
   `).join('');
+
+  el.querySelectorAll('.card-btn').forEach(btn => {
+    btn.addEventListener('click', () => moveCompletedToReading(btn.dataset.title));
+  });
 }
 
 // ── STATS ─────────────────────────────────────────────────────
