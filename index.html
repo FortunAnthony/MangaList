@@ -180,6 +180,7 @@
     position: relative;
     overflow: hidden;
     transition: background 0.15s, border-color 0.15s;
+    touch-action: none;
   }
 
   .manga-card::before {
@@ -779,7 +780,6 @@ function renderReading() {
     </div>`;
   }).join('');
 
-  // ── Event delegation for all reading actions ──
   el.onclick = function(e) {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
@@ -816,7 +816,6 @@ function renderReading() {
 // ── QUEUE ─────────────────────────────────────────────────────
 function moveQueueToReading(idx) {
   const m = state.queue[idx];
-  // New manga becomes main read; demote old main
   state.reading.forEach(r => r.isMain = false);
   state.reading.push({ title: m.title, status: 'ongoing', isMain: true });
   state.queue.splice(idx, 1);
@@ -904,15 +903,17 @@ function renderQueue() {
     if (btn.dataset.action === 'remove') removeFromQueue(idx);
   };
 
-  // Drag & drop
+  // Drag & drop (desktop) + Touch (iPad / mobile)
   el.querySelectorAll('.manga-card').forEach((card, i) => {
+
+    // ── Desktop drag events ──
     card.addEventListener('dragstart', e => {
       dragSrcIdx = i;
       e.dataTransfer.effectAllowed = 'move';
       setTimeout(() => card.classList.add('dragging'), 0);
     });
     card.addEventListener('dragend', () => {
-      el.querySelectorAll('.manga-card').forEach(c => c.classList.remove('dragging','drag-over'));
+      el.querySelectorAll('.manga-card').forEach(c => c.classList.remove('dragging', 'drag-over'));
       dragSrcIdx = null;
     });
     card.addEventListener('dragover', e => {
@@ -930,6 +931,40 @@ function renderQueue() {
       dragSrcIdx = null;
       saveState();
       renderQueue();
+    });
+
+    // ── Touch events (iPad / mobile) ──
+    card.addEventListener('touchstart', e => {
+      dragSrcIdx = i;
+      setTimeout(() => card.classList.add('dragging'), 0);
+    }, { passive: true });
+
+    card.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      const overCard = target?.closest('.manga-card');
+      el.querySelectorAll('.manga-card').forEach(c => c.classList.remove('drag-over'));
+      if (overCard && overCard !== card) overCard.classList.add('drag-over');
+    }, { passive: false });
+
+    card.addEventListener('touchend', e => {
+      const touch = e.changedTouches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      const overCard = target?.closest('.manga-card');
+      el.querySelectorAll('.manga-card').forEach(c => c.classList.remove('dragging', 'drag-over'));
+
+      if (overCard) {
+        const cards = [...el.querySelectorAll('.manga-card')];
+        const dropIdx = cards.indexOf(overCard);
+        if (dropIdx !== -1 && dropIdx !== dragSrcIdx) {
+          const item = state.queue.splice(dragSrcIdx, 1)[0];
+          state.queue.splice(dropIdx, 0, item);
+          saveState();
+          renderQueue();
+        }
+      }
+      dragSrcIdx = null;
     });
   });
 }
