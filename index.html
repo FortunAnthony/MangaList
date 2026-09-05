@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Manga Tracker</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Manga">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+ :root{
+   --ink:#0a0a0f;
+   --paper:#f5f0e8;
+   --red:#c0392b;
+   --blue:#3498db;
+   --gold:#d4a017;
+   --panel-bg:#1a1a24;
+   --panel-light:#242436;
+   --text-light:#e8e0d0;
+   --text-dim:#7a7468;
+   --green:#2ecc71;
+   --orange:#e67e22;
+
+   /* Neutral length palette — gold is reserved for STATUS + MAIN READ only */
+   --len-short:#8fa3b8;
+   --len-medium:#5fa8a0;
+   --len-long:#8d84c4;
+   --len-vlong:#b1739e;
+
+   --hdr-h:52px;
+ }
+
+ *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+
+ body{
+   background:var(--ink);
+   color:var(--text-light);
+   font-family:'Noto Sans JP',sans-serif;
+   font-weight:300;
+   min-height:100vh;
+   overflow-x:hidden;
+   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+ }
+
+ body::before{
+   content:'';
+   position:fixed;
+   inset:0;
+   background-image:radial-gradient(circle,rgba(255,255,255,0.03) 1px,transparent 1px);
+   background-size:18px 18px;
+   pointer-events:none;
+   z-index:0;
+ }
+
+ .container{
+   position:relative;
+   z-index:1;
+   max-width:820px;
+   margin:0 auto;
+   padding:20px 14px 90px;
+ }
+
+ /* ══ HEADER (collapses on scroll) ══ */
+ header{
+   text-align:center;
+   margin-bottom:18px;
+   padding-bottom:16px;
+   border-bottom:2px solid rgba(255,255,255,0.06);
+   transition:padding .25s ease,margin .25s ease;
+ }
+
+ .header-eyebrow{
+   font-size:10px;
+   letter-spacing:6px;
+   text-transform:uppercase;
+   color:var(--blue);
+   margin-bottom:6px;
+   transition:opacity .2s,max-height .25s,margin .25s;
+   overflow:hidden;
+   max-height:20px;
+ }
+
+ h1{
+   font-family:'Bebas Neue',sans-serif;
+   font-size:clamp(38px,9vw,72px);
+   letter-spacing:4px;
+   line-height:.92;
+   color:var(--paper);
+   text-shadow:3px 3px 0 var(--blue);
+   transition:font-size .25s ease;
+ }
+
+ .header-sub{
+   font-size:11px;
+   color:var(--text-dim);
+   letter-spacing:3px;
+   margin-top:10px;
+   text-transform:uppercase;
+   transition:opacity .2s,max-height .25s,margin .25s;
+   overflow:hidden;
+   max-height:20px;
+ }
+
+ /* Collapsed state */
+ body.scrolled header{padding-bottom:10px;margin-bottom:12px;}
+ body.scrolled .header-eyebrow,
+ body.scrolled .header-sub{opacity:0;max-height:0;margin:0;}
+ body.scrolled h1{font-size:clamp(26px,6vw,38px);text-shadow:2px 2px 0 var(--blue);}
+
+ /* ══ DATA BAR ══ */
+ .data-bar{
+   display:flex;
+   gap:8px;
+   justify-content:center;
+   flex-wrap:wrap;
+   margin-bottom:16px;
+ }
+
+ .mini-btn{
+   background:transparent;
+   border:1px solid rgba(255,255,255,0.1);
+   color:var(--text-dim);
+   font-family:'Noto Sans JP',sans-serif;
+   font-size:10px;
+   letter-spacing:2px;
+   text-transform:uppercase;
+   padding:10px 14px;
+   min-height:40px;
+   border-radius:4px;
+   cursor:pointer;
+   transition:all .15s;
+ }
+ .mini-btn:hover{border-color:var(--blue);color:var(--blue);}
+ .mini-btn.accent{border-color:rgba(212,160,23,.4);color:var(--gold);}
+ .mini-btn.accent:hover{border-color:var(--gold);background:rgba(212,160,23,.08);}
+ .mini-btn.hidden{display:none;}
+
+ .stats-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+
+ .stat-pill{
+   background:var(--panel-light);
+   border:1px solid rgba(255,255,255,0.07);
+   border-radius:4px;
+   padding:8px 14px;
+   font-size:11px;
+   letter-spacing:1px;
+   flex:1;
+   min-width:96px;
+   text-align:center;
+ }
+ .stat-pill span{
+   display:block;
+   font-family:'Bebas Neue',sans-serif;
+   font-size:24px;
+   letter-spacing:2px;
+   line-height:1;
+   margin-bottom:2px;
+ }
+ .stat-pill.green span{color:var(--green);}
+ .stat-pill.gold span{color:var(--gold);}
+ .stat-pill.blue span{color:var(--blue);}
+
+ /* ══ STICKY TABS ══ */
+ .tabs{
+   position:sticky;
+   top:0;
+   z-index:20;
+   display:flex;
+   gap:4px;
+   margin-bottom:14px;
+   background:rgba(16,16,24,.94);
+   backdrop-filter:blur(8px);
+   -webkit-backdrop-filter:blur(8px);
+   padding:5px;
+   border-radius:6px;
+   border:1px solid rgba(255,255,255,0.07);
+ }
+
+ .tab{
+   flex:1;
+   background:transparent;
+   border:none;
+   color:var(--text-dim);
+   font-family:'Noto Sans JP',sans-serif;
+   font-size:11px;
+   letter-spacing:2px;
+   text-transform:uppercase;
+   padding:12px 6px;
+   min-height:44px;
+   cursor:pointer;
+   border-radius:4px;
+   transition:all .2s;
+ }
+ .tab.active{background:var(--blue);color:#fff;}
+ .tab:hover:not(.active){background:rgba(255,255,255,0.05);color:var(--text-light);}
+ .tab .tab-count{
+   display:block;
+   font-family:'Bebas Neue',sans-serif;
+   font-size:14px;
+   letter-spacing:1px;
+   opacity:.75;
+   line-height:1.1;
+ }
+
+ .section{display:none;}
+ .section.active{display:block;}
+
+ /* ══ SEARCH / FILTER (sticky under tabs) ══ */
+ .search-block{
+   position:sticky;
+   top:59px;
+   z-index:19;
+   background:rgba(10,10,15,.96);
+   backdrop-filter:blur(8px);
+   -webkit-backdrop-filter:blur(8px);
+   padding:8px 0 6px;
+   margin-bottom:6px;
+ }
+
+ .search-wrap{position:relative;margin-bottom:8px;}
+
+ .search-input{
+   width:100%;
+   background:var(--panel-light);
+   border:1px solid rgba(255,255,255,0.1);
+   border-radius:4px;
+   color:var(--text-light);
+   font-family:'Noto Sans JP',sans-serif;
+   font-size:14px;
+   padding:12px 40px 12px 36px;
+   min-height:44px;
+   outline:none;
+   transition:border-color .15s;
+ }
+ .search-input:focus{border-color:rgba(52,152,219,.5);}
+ .search-input::placeholder{color:var(--text-dim);}
+
+ .search-icon{
+   position:absolute;left:12px;top:50%;transform:translateY(-50%);
+   font-size:13px;color:var(--text-dim);pointer-events:none;
+ }
+
+ .search-clear{
+   position:absolute;right:4px;top:50%;transform:translateY(-50%);
+   background:transparent;border:none;color:var(--text-dim);
+   font-size:16px;cursor:pointer;padding:10px 12px;line-height:1;display:none;
+ }
+ .search-clear:hover{color:var(--red);}
+ .search-clear.visible{display:block;}
+
+ .filter-chips{display:flex;gap:6px;flex-wrap:wrap;}
+
+ .fchip{
+   background:transparent;
+   border:1px solid rgba(255,255,255,0.1);
+   color:var(--text-dim);
+   font-family:'Noto Sans JP',sans-serif;
+   font-size:9px;
+   letter-spacing:1.5px;
+   text-transform:uppercase;
+   font-weight:700;
+   padding:9px 12px;
+   min-height:36px;
+   border-radius:3px;
+   cursor:pointer;
+   transition:all .15s;
+ }
+ .fchip:hover{border-color:rgba(255,255,255,0.25);color:var(--text-light);}
+ .fchip.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+
+ .empty-state{
+   text-align:center;
+   padding:40px 20px;
+   color:var(--text-dim);
+   font-size:12px;
+   letter-spacing:2px;
+   text-transform:uppercase;
+ }
+
+ .progress-label{
+   font-size:11px;
+   color:var(--text-dim);
+   letter-spacing:2px;
+   text-transform:uppercase;
+   margin-bottom:10px;
+ }
+
+ /* ══ CARDS ══ */
+ .manga-list{display:flex;flex-direction:column;gap:6px;}
+
+ .manga-card{
+   background:var(--panel-bg);
+   border:1px solid rgba(255,255,255,0.06);
+   border-radius:6px;
+   padding:10px 12px;
+   display:flex;
+   align-items:center;
+   gap:10px;
+   position:relative;
+   overflow:hidden;
+   transition:background .15s,border-color .15s;
+ }
+
+ .manga-card::before{
+   content:'';
+   position:absolute;left:0;top:0;bottom:0;
+   width:3px;background:var(--blue);opacity:0;transition:opacity .15s;
+ }
+
+ .manga-card:hover{background:var(--panel-light);border-color:rgba(255,255,255,0.12);}
+ .manga-card:hover::before{opacity:1;}
+
+ .manga-card.status-ongoing::before{background:var(--gold);opacity:1;}
+ .manga-card.status-ended::before{background:var(--green);opacity:1;}
+ .manga-card.completed-card::before{background:var(--green);opacity:1;}
+
+ .manga-card.is-main{
+   background:rgba(212,160,23,.07);
+   border-color:rgba(212,160,23,.35);
+ }
+ .manga-card.is-main::before{background:var(--gold);opacity:1;width:4px;}
+ .manga-card.is-main:hover{background:rgba(212,160,23,.12);border-color:rgba(212,160,23,.5);}
+
+ .drag-handle{
+   cursor:grab;
+   color:var(--text-dim);
+   font-size:17px;
+   padding:10px 8px;
+   flex-shrink:0;
+   user-select:none;
+   line-height:1;
+   letter-spacing:-1px;
+   touch-action:none;
+   display:none;
+ }
+ .drag-handle:active{cursor:grabbing;}
+ .edit-mode .drag-handle{display:block;}
+
+ .manga-card.dragging{opacity:.4;border:1px dashed rgba(255,255,255,0.2);}
+ .manga-card.drag-over{border-color:var(--gold);background:rgba(212,160,23,.08);}
+
+ .num{
+   font-family:'Bebas Neue',sans-serif;
+   font-size:19px;
+   color:var(--text-dim);
+   min-width:24px;
+   text-align:right;
+   line-height:1;
+   flex-shrink:0;
+ }
+
+ .manga-info{flex:1;min-width:0;}
+
+ .manga-title{
+   font-size:14px;
+   font-weight:400;
+   letter-spacing:.3px;
+   white-space:nowrap;
+   overflow:hidden;
+   text-overflow:ellipsis;
+ }
+
+ /* Single-line chip row — keeps every card the same height */
+ .tags{
+   display:flex;
+   gap:5px;
+   flex-wrap:nowrap;
+   overflow:hidden;
+   margin-top:5px;
+   align-items:center;
+ }
+
+ .tag{
+   font-size:9px;
+   letter-spacing:1.5px;
+   text-transform:uppercase;
+   padding:3px 7px;
+   border-radius:2px;
+   font-weight:700;
+   white-space:nowrap;
+   flex-shrink:0;
+ }
+
+ .tag.length-short{background:rgba(143,163,184,.14);color:var(--len-short);border:1px solid rgba(143,163,184,.22);}
+ .tag.length-medium{background:rgba(95,168,160,.14);color:var(--len-medium);border:1px solid rgba(95,168,160,.22);}
+ .tag.length-long{background:rgba(141,132,196,.14);color:var(--len-long);border:1px solid rgba(141,132,196,.22);}
+ .tag.length-very-long{background:rgba(177,115,158,.14);color:var(--len-vlong);border:1px solid rgba(177,115,158,.22);}
+ .tag.genre{background:rgba(255,255,255,0.05);color:var(--text-dim);border:1px solid rgba(255,255,255,0.08);}
+ .tag.overflow{
+   background:transparent;
+   color:var(--text-dim);
+   border:1px dashed rgba(255,255,255,0.18);
+   cursor:default;
+ }
+
+ /* ══ BUTTONS — 44px touch targets ══ */
+ .card-actions{display:flex;gap:6px;flex-shrink:0;align-items:center;}
+
+ .card-btn{
+   background:rgba(255,255,255,0.06);
+   border:1px solid rgba(255,255,255,0.1);
+   border-radius:5px;
+   color:var(--text-dim);
+   font-size:14px;
+   min-width:40px;
+   min-height:40px;
+   display:inline-flex;
+   align-items:center;
+   justify-content:center;
+   padding:0 8px;
+   cursor:pointer;
+   transition:all .15s;
+   line-height:1;
+   font-family:'Noto Sans JP',sans-serif;
+   font-variant-emoji:text;
+ }
+
+ .card-btn:hover{background:rgba(255,255,255,0.12);color:var(--text-light);}
+ .card-btn.btn-green:hover{background:rgba(46,204,113,.15);border-color:var(--green);color:var(--green);}
+ .card-btn.btn-blue:hover{background:rgba(52,152,219,.15);border-color:var(--blue);color:var(--blue);}
+ .card-btn.btn-orange:hover{background:rgba(230,126,34,.15);border-color:var(--orange);color:var(--orange);}
+ .card-btn.btn-red:hover{background:rgba(192,57,43,.15);border-color:var(--red);color:var(--red);}
+ .card-btn.btn-gold:hover{background:rgba(212,160,23,.15);border-color:var(--gold);color:var(--gold);}
+
+ /* Danger button separated from the primary action */
+ .card-btn.btn-red{margin-left:2px;}
+
+ .card-btn.btn-pin-active{
+   background:rgba(212,160,23,.15)!important;
+   border-color:var(--gold)!important;
+   color:var(--gold)!important;
+ }
+
+ .status-badge{
+   font-size:9px;
+   letter-spacing:1.5px;
+   text-transform:uppercase;
+   padding:4px 8px;
+   border-radius:2px;
+   font-weight:700;
+   cursor:pointer;
+   transition:all .15s;
+   user-select:none;
+   white-space:nowrap;
+   flex-shrink:0;
+ }
+ .badge-ongoing{background:rgba(212,160,23,.15);color:var(--gold);border:1px solid rgba(212,160,23,.35);}
+ .badge-ongoing:hover{background:rgba(46,204,113,.15);color:var(--green);border-color:rgba(46,204,113,.35);}
+ .badge-ended{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.35);}
+ .badge-ended:hover{background:rgba(212,160,23,.15);color:var(--gold);border-color:rgba(212,160,23,.35);}
+
+ .start-chip{
+   font-size:9px;
+   letter-spacing:1px;
+   text-transform:uppercase;
+   padding:4px 8px;
+   border-radius:2px;
+   font-weight:700;
+   cursor:pointer;
+   user-select:none;
+   white-space:nowrap;
+   flex-shrink:0;
+   background:rgba(52,152,219,.1);
+   color:#7ab8e0;
+   border:1px solid rgba(52,152,219,.22);
+   transition:all .15s;
+ }
+ .start-chip:hover{background:rgba(52,152,219,.2);color:var(--blue);}
+ .start-chip.unset{background:transparent;color:var(--text-dim);border:1px dashed rgba(255,255,255,0.15);}
+ .start-chip.na{background:transparent;color:var(--gold);border:1px dashed rgba(212,160,23,.35);opacity:.75;}
+
+ .status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+ .status-dot.ongoing{background:var(--gold);box-shadow:0 0 6px var(--gold);}
+ .status-dot.ended{background:var(--green);box-shadow:0 0 6px var(--green);}
+ /* Only the pinned main read pulses — makes the pin meaningful at a glance */
+ .is-main .status-dot.ongoing{animation:pulse 2s infinite;}
+
+ @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+ /* ══ ADD FORM ══ */
+ .add-form{
+   background:var(--panel-bg);
+   border:1px solid rgba(255,255,255,0.08);
+   border-radius:8px;
+   padding:14px;
+   margin-bottom:14px;
+ }
+
+ .add-form-title{
+   font-size:11px;
+   letter-spacing:3px;
+   text-transform:uppercase;
+   color:var(--text-dim);
+   margin-bottom:10px;
+ }
+
+ .add-form-row{display:flex;gap:8px;flex-wrap:wrap;}
+ .add-form-row2{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+
+ .add-input{
+   flex:2;min-width:140px;
+   background:var(--panel-light);
+   border:1px solid rgba(255,255,255,0.1);
+   border-radius:4px;
+   color:var(--text-light);
+   font-family:'Noto Sans JP',sans-serif;
+   font-size:14px;
+   padding:11px 12px;
+   min-height:44px;
+   outline:none;
+   transition:border-color .15s;
+ }
+ .add-input:focus{border-color:rgba(255,255,255,0.25);}
+
+ .add-select{
+   flex:1;min-width:90px;
+   background:var(--panel-light);
+   border:1px solid rgba(255,255,255,0.1);
+   border-radius:4px;
+   color:var(--text-light);
+   font-family:'Noto Sans JP',sans-serif;
+   font-size:14px;
+   padding:11px 12px;
+   min-height:44px;
+   outline:none;
+   cursor:pointer;
+ }
+ .add-select option{background:var(--panel-bg);}
+
+ .add-btn{
+   background:var(--blue);
+   border:none;
+   border-radius:4px;
+   color:#fff;
+   font-family:'Bebas Neue',sans-serif;
+   font-size:17px;
+   letter-spacing:2px;
+   padding:11px 22px;
+   min-height:44px;
+   cursor:pointer;
+   transition:opacity .15s;
+   flex-shrink:0;
+ }
+ .add-btn:hover{opacity:.85;}
+
+ .completed-date{font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-top:3px;}
+
+ /* ══ MODAL ══ */
+ .modal-overlay{
+   position:fixed;inset:0;
+   background:rgba(0,0,0,.75);
+   z-index:100;
+   display:flex;align-items:center;justify-content:center;
+   padding:20px;
+ }
+ .modal-overlay.hidden{display:none;}
+
+ .modal{
+   background:var(--panel-bg);
+   border:1px solid rgba(255,255,255,0.1);
+   border-radius:10px;
+   padding:22px;
+   width:100%;
+   max-width:360px;
+ }
+
+ .modal h3{
+   font-family:'Bebas Neue',sans-serif;
+   font-size:22px;letter-spacing:2px;margin-bottom:6px;color:var(--paper);
+ }
+ .modal p{font-size:12px;color:var(--text-dim);margin-bottom:14px;letter-spacing:.5px;}
+
+ .modal-input{
+   width:100%;
+   background:var(--panel-light);
+   border:1px solid rgba(255,255,255,0.1);
+   border-radius:4px;
+   color:var(--text-light);
+   font-family:'Noto Sans JP',sans-serif;
+   font-size:15px;
+   padding:12px;
+   min-height:46px;
+   outline:none;
+   margin-bottom:12px;
+ }
+ .modal-input:focus{border-color:rgba(255,255,255,0.25);}
+
+ .modal-btns{display:flex;gap:8px;flex-wrap:wrap;}
+
+ .modal-btn{
+   flex:1;min-width:80px;
+   padding:12px;
+   min-height:46px;
+   border-radius:4px;
+   border:none;
+   font-family:'Bebas Neue',sans-serif;
+   font-size:16px;letter-spacing:2px;cursor:pointer;transition:opacity .15s;
+ }
+ .modal-btn.confirm{background:var(--green);color:#000;}
+ .modal-btn.cancel{background:var(--panel-light);color:var(--text-dim);}
+ .modal-btn.neutral{background:var(--panel-light);color:var(--gold);}
+ .modal-btn.warn{background:var(--panel-light);color:var(--red);}
+ .modal-btn:hover{opacity:.85;}
+
+ /* ══ TOOLBAR ══ */
+ .toolbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;}
+
+ .edit-btn{
+   background:transparent;
+   border:1px solid rgba(255,255,255,0.1);
+   color:var(--text-dim);
+   font-family:'Noto Sans JP',sans-serif;
+   font-size:11px;letter-spacing:2px;text-transform:uppercase;
+   padding:10px 15px;min-height:40px;
+   border-radius:4px;cursor:pointer;transition:all .15s;
+ }
+ .edit-btn:hover{border-color:var(--blue);color:var(--blue);}
+ .edit-btn.active{border-color:var(--green);color:var(--green);background:rgba(46,204,113,.08);}
+ .edit-btn.active:hover{border-color:var(--red);color:var(--red);background:rgba(192,57,43,.08);}
+ .edit-btn:disabled{opacity:.35;cursor:not-allowed;}
+ .edit-btn:disabled:hover{border-color:rgba(255,255,255,0.1);color:var(--text-dim);}
+
+ .edit-banner{
+   display:none;
+   background:rgba(46,204,113,.08);
+   border:1px solid rgba(46,204,113,.2);
+   border-radius:4px;
+   padding:9px 14px;
+   font-size:11px;letter-spacing:2px;text-transform:uppercase;
+   color:var(--green);margin-bottom:10px;text-align:center;
+ }
+ .edit-banner.visible{display:block;}
+
+ /* ══ TOAST ══ */
+ .toast{
+   position:fixed;
+   left:50%;
+   bottom:calc(20px + env(safe-area-inset-bottom));
+   transform:translateX(-50%) translateY(140%);
+   background:var(--panel-light);
+   border:1px solid rgba(255,255,255,0.14);
+   border-radius:8px;
+   padding:12px 14px;
+   display:flex;align-items:center;gap:12px;
+   font-size:12px;letter-spacing:1px;
+   z-index:200;
+   box-shadow:0 8px 28px rgba(0,0,0,.5);
+   transition:transform .25s ease;
+   max-width:calc(100vw - 28px);
+ }
+ .toast.show{transform:translateX(-50%) translateY(0);}
+ .toast-msg{color:var(--text-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+ .toast-action{
+   background:transparent;border:1px solid var(--gold);color:var(--gold);
+   font-family:'Noto Sans JP',sans-serif;font-size:11px;letter-spacing:2px;
+   text-transform:uppercase;padding:8px 12px;min-height:36px;
+   border-radius:4px;cursor:pointer;flex-shrink:0;
+ }
+ .toast-action:hover{background:rgba(212,160,23,.15);}
+
+ /* ══ SCROLL TO TOP ══ */
+ .to-top{
+   position:fixed;
+   right:16px;
+   bottom:calc(18px + env(safe-area-inset-bottom));
+   width:46px;height:46px;
+   border-radius:50%;
+   background:var(--panel-light);
+   border:1px solid rgba(255,255,255,0.14);
+   color:var(--text-dim);
+   font-size:18px;
+   cursor:pointer;
+   display:flex;align-items:center;justify-content:center;
+   opacity:0;pointer-events:none;
+   transition:opacity .2s,color .15s,border-color .15s;
+   z-index:50;
+   box-shadow:0 4px 16px rgba(0,0,0,.4);
+ }
+ .to-top.visible{opacity:.92;pointer-events:auto;}
+ .to-top:hover{color:var(--blue);border-color:var(--blue);}
+
+ @media (max-width:420px){
+   .stat-pill{padding:7px 8px;min-width:0;}
+   .card-btn{min-width:38px;padding:0 6px;}
+ }
+</style>
+</head>
+<body>
+
+<!-- ══ DATE MODAL ══ -->
+<div class="modal-overlay hidden" id="dateModal">
+ <div class="modal">
+   <h3 id="modalHeading">Start Date</h3>
+   <p id="modalTitle">—</p>
+   <input type="date" class="modal-input" id="modalDate">
+   <div class="modal-btns">
+     <button class="modal-btn cancel" id="modalCancelBtn">Cancel</button>
+     <button class="modal-btn neutral" id="modalNaBtn">N/A</button>
+     <button class="modal-btn warn" id="modalClearBtn">Clear</button>
+     <button class="modal-btn confirm" id="modalConfirmBtn">Save</button>
+   </div>
+ </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast">
+ <span class="toast-msg" id="toastMsg"></span>
+ <button class="toast-action hidden" id="toastAction">Undo</button>
+</div>
+
+<button class="to-top" id="toTop" aria-label="Scroll to top">↑</button>
+
+<div class="container">
+ <header>
+   <div class="header-eyebrow">Personal Library</div>
+   <h1>MANGA<br>TRACKER</h1>
+   <div class="header-sub" id="headerSub">Loading…</div>
+ </header>
+
+ <div class="data-bar">
+   <button class="mini-btn accent hidden" id="installBtn" aria-label="Install app">⤓ Install App</button>
+   <button class="mini-btn" id="exportBtn" aria-label="Export backup">↓ Export</button>
+   <button class="mini-btn" id="importBtn" aria-label="Import backup">↑ Import</button>
+   <input type="file" id="importFile" accept="application/json" hidden>
+ </div>
+
+ <div class="stats-bar">
+   <div class="stat-pill blue"><span id="statReading">0</span>Reading</div>
+   <div class="stat-pill gold"><span id="statQueue">0</span>Queue</div>
+   <div class="stat-pill green"><span id="statCompleted">0</span>Completed</div>
+ </div>
+
+ <div class="tabs" id="tabs">
+   <button class="tab active" data-tab="reading">Reading<span class="tab-count" id="tcReading">0</span></button>
+   <button class="tab" data-tab="future">Queue<span class="tab-count" id="tcQueue">0</span></button>
+   <button class="tab" data-tab="completed">Completed<span class="tab-count" id="tcCompleted">0</span></button>
+ </div>
+
+ <!-- ══ READING ══ -->
+ <div class="section active" id="tab-reading">
+   <div class="manga-list" id="list-reading"></div>
+ </div>
+
+ <!-- ══ QUEUE ══ -->
+ <div class="section" id="tab-future">
+   <div class="add-form">
+     <div class="add-form-title">Add to Queue</div>
+     <div class="add-form-row">
+       <input class="add-input" id="addTitle" placeholder="Title…" aria-label="New title">
+       <select class="add-select" id="addLength" aria-label="Length">
+         <option value="short">Short</option>
+         <option value="medium" selected>Medium</option>
+         <option value="long">Long</option>
+         <option value="very-long">Very Long</option>
+       </select>
+     </div>
+     <div class="add-form-row2">
+       <input class="add-input" id="addGenre" placeholder="Genre (e.g. Action / Romance)" style="flex:2" aria-label="Genre">
+       <select class="add-select" id="addPosition" style="flex:1" aria-label="Insert position"></select>
+       <button class="add-btn" id="addBtn">Add</button>
+     </div>
+   </div>
+
+   <div class="search-block">
+     <div class="search-wrap">
+       <span class="search-icon">⌕</span>
+       <input class="search-input" id="queueSearch" placeholder="Search title or genre…" aria-label="Search queue">
+       <button class="search-clear" id="queueSearchClear" aria-label="Clear search">✕</button>
+     </div>
+     <div class="filter-chips" id="lengthFilters">
+       <button class="fchip active" data-len="all">All</button>
+       <button class="fchip" data-len="short">Short</button>
+       <button class="fchip" data-len="medium">Medium</button>
+       <button class="fchip" data-len="long">Long</button>
+       <button class="fchip" data-len="very-long">Very Long</button>
+     </div>
+   </div>
+
+   <div class="toolbar">
+     <button class="edit-btn" id="editBtn">✎ Edit Order</button>
+   </div>
+   <div class="edit-banner" id="editBanner">Drag ⠿ handles to reorder — tap Done when finished</div>
+   <div class="progress-label" id="progressLabel">0 in queue</div>
+   <div class="manga-list" id="list-future"></div>
+ </div>
+
+ <!-- ══ COMPLETED ══ -->
+ <div class="section" id="tab-completed">
+   <div class="search-block">
+     <div class="search-wrap">
+       <span class="search-icon">⌕</span>
+       <input class="search-input" id="compSearch" placeholder="Search completed…" aria-label="Search completed">
+       <button class="search-clear" id="compSearchClear" aria-label="Clear search">✕</button>
+     </div>
+   </div>
+   <div class="manga-list" id="list-completed"></div>
+ </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   SEED DATA
+   ═══════════════════════════════════════════════ */
+const SEED_READING = [
+ { title:"Delicious in Dungeon", status:"ended",   isMain:true,  startDate:"na" },
+ { title:"Blue Exorcist",        status:"ongoing", startDate:"na" },
+ { title:"Boruto: Two Blue Vortex", status:"ongoing", startDate:"na" },
+ { title:"Frieren: Beyond Journey's End", status:"ongoing", startDate:"na" },
+ { title:"Gal Yome no Himitsu",  status:"ongoing", startDate:"na" },
+ { title:"Hal Formula",          status:"ongoing", startDate:"na" },
+ { title:"Ichi the Witch",       status:"ongoing", startDate:"na" },
+ { title:"Kagurabachi",          status:"ongoing", startDate:"na" },
+ { title:"Kurumizawa's Folly",   status:"ongoing", startDate:"na" },
+ { title:"One Piece",            status:"ongoing", startDate:"na" },
+ { title:"Re:Zero − Starting Life in Another World", status:"ongoing", startDate:"na" },
+ { title:"Sakamoto Days",        status:"ongoing", startDate:"na" },
+ { title:"Spy × Family",         status:"ongoing", startDate:"na" },
+ { title:"Sundome",              status:"ended",   startDate:"na" },
+ { title:"Twilight Blade",       status:"ongoing", startDate:"na" }
+];
+
+const SEED_QUEUE = [
+ { title:"Vinland Saga", length:"long", genre:"Historical / Action" },
+ { title:"Barrage", length:"short", genre:"Sci-Fi / Action" },
+ { title:"The Apothecary Diaries", length:"medium", genre:"Mystery / Historical" },
+ { title:"Attack on Titan", length:"long", genre:"Action / Horror" },
+ { title:"Hima-Ten!", length:"short", genre:"Romance / Comedy" },
+ { title:"Gushing over Magical Girls", length:"medium", genre:"Action / Comedy / Parody" },
+ { title:"Berserk", length:"long", genre:"Dark Fantasy / Action" },
+ { title:"Blue Kill", length:"short", genre:"Thriller / Action" },
+ { title:"Witch Hat Atelier", length:"medium", genre:"Fantasy" },
+ { title:"Hunter × Hunter", length:"long", genre:"Action / Adventure" },
+ { title:"The Heiress and the Chauffeur", length:"short", genre:"Romance / Drama" },
+ { title:"Trigun", length:"medium", genre:"Sci-Fi / Action" },
+ { title:"Dragon Ball", length:"long", genre:"Action / Adventure" },
+ { title:"Maid Sama!", length:"long", genre:"Romance / Comedy / Slice of Life" },
+ { title:"JJK Modulo", length:"short", genre:"Action" },
+ { title:"Assassination Classroom", length:"medium", genre:"Action / Comedy" },
+ { title:"JoJo's Bizarre Adventure", length:"very-long", genre:"Action / Adventure" },
+ { title:"I'm in Love with the Older Girl Next Door", length:"short", genre:"Romance / Slice of Life" },
+ { title:"Campfire Cooking in Another World", length:"medium", genre:"Isekai / Slice of Life" },
+ { title:"My Dress-Up Darling", length:"medium", genre:"Romance / Slice of Life" },
+ { title:"Lone Wolf & Cub", length:"long", genre:"Historical / Action" },
+ { title:"The Mortifying Ordeal of Being Seen", length:"short", genre:"Romance / Comedy" },
+ { title:"Record of Ragnarok", length:"medium", genre:"Action / Mythology" },
+ { title:"Vagabond", length:"long", genre:"Historical / Action" },
+ { title:"ReLIFE", length:"long", genre:"Romance / Drama / Slice of Life" },
+ { title:"Gonron Egg", length:"short", genre:"Unknown" },
+ { title:"Dandadan", length:"medium", genre:"Action / Sci-Fi / Romance" },
+ { title:"Rent-A-Girlfriend", length:"long", genre:"Romance / Comedy" },
+ { title:"Four Knights of the Apocalypse", length:"medium", genre:"Fantasy / Action" },
+ { title:"Iron Wok Jan", length:"long", genre:"Action / Comedy / Cooking" },
+ { title:"Kingdom", length:"very-long", genre:"Historical / Action" },
+ { title:"Bijin Onna Joushi Takizawa-san", length:"short", genre:"Romance / Workplace" },
+ { title:"Tougen Anki", length:"medium", genre:"Action / Fantasy" },
+ { title:"Jujutsu Kaisen", length:"long", genre:"Action / Horror" },
+ { title:"Domestic Girlfriend", length:"medium", genre:"Romance / Drama" },
+ { title:"Tomb Raider King", length:"long", genre:"Action / Fantasy" },
+ { title:"Happy Marriage!?", length:"medium", genre:"Romance / Drama" },
+ { title:"Fragrant Flower Blooms With Dignity", length:"long", genre:"Romance / Slice of Life" },
+ { title:"Solo Leveling", length:"medium", genre:"Action / Fantasy" },
+ { title:"Black Torch", length:"short", genre:"Action / Sci-Fi / Supernatural" },
+ { title:"Black Clover", length:"long", genre:"Action / Fantasy" },
+ { title:"Lord of the Mysteries", length:"very-long", genre:"Mystery / Fantasy" },
+ { title:"2.5 Dimensional Seduction", length:"medium", genre:"Romance / Slice of Life" },
+ { title:"Ubel Blatt", length:"long", genre:"Dark Fantasy / Action" },
+ { title:"Jack of All Trades", length:"medium", genre:"Isekai / Action" },
+ { title:"Planetes", length:"medium", genre:"Sci-Fi / Slice of Life" },
+ { title:"Nana to Kaoru", length:"long", genre:"Romance / Drama" },
+ { title:"The Elusive Samurai", length:"medium", genre:"Historical / Action" },
+ { title:"One-Punch Man", length:"long", genre:"Action / Comedy" },
+ { title:"The Seven Deadly Sins", length:"long", genre:"Fantasy / Action" },
+ { title:"Futari H", length:"long", genre:"Romance / Drama" },
+ { title:"Blade of the Immortal", length:"long", genre:"Historical / Action" },
+ { title:"Yomi no Tsugai", length:"short", genre:"Fantasy / Action" },
+ { title:"Bleach", length:"very-long", genre:"Action / Fantasy" }
+];
+
+const SEED_COMPLETED = [
+ { title:"Ane Doki", date:"", startDate:"na" },
+ { title:"Astro Royale", date:"", startDate:"na" },
+ { title:"Boruto", date:"", startDate:"na" },
+ { title:"Death Note", date:"", startDate:"na" },
+ { title:"Demon Slayer: Kimetsu no Yaiba", date:"", startDate:"na" },
+ { title:"Dr. Stone", date:"", startDate:"na" },
+ { title:"Food Wars!: Shokugeki no Soma", date:"", startDate:"na" },
+ { title:"Fullmetal Alchemist", date:"", startDate:"na" },
+ { title:"My Hero Academia", date:"", startDate:"na" },
+ { title:"Naruto", date:"", startDate:"na" },
+ { title:"OTR of the Flame", date:"", startDate:"na" },
+ { title:"Romantic Killer", date:"", startDate:"na" },
+ { title:"Shokugeki no Sanji", date:"", startDate:"na" },
+ { title:"Show-ha Shoten!", date:"", startDate:"na" },
+ { title:"Star of Beethoven", date:"", startDate:"na" },
+ { title:"Tokyo Ghoul", date:"", startDate:"na" },
+ { title:"Velvet Kiss", date:"", startDate:"na" },
+ { title:"You and I Are Polar Opposites", date:"", startDate:"na" },
+ { title:"Yu-Gi-Oh!", date:"", startDate:"na" },
+ { title:"Your Lie in April", date:"2026-07-21", startDate:"na" }
+];
+
+/* ═══════════════════════════════════════════════
+   STORAGE — permanent key + migration
+   ═══════════════════════════════════════════════ */
+const STORAGE_KEY = 'mangaTracker';
+const LEGACY_KEYS = ['mangaTrackerV9','mangaTrackerV8','mangaTrackerV7','mangaTrackerV6','mangaTrackerV5','mangaTrackerV4','mangaTrackerV3'];
+
+let uidCounter = Date.now();
+function uid(){ return 'm' + (uidCounter++).toString(36); }
+
+function withIds(arr){
+  return (arr||[]).map(o => Object.assign({ id: uid() }, o));
+}
+
+function defaultState(){
+  return {
+    reading:   withIds(JSON.parse(JSON.stringify(SEED_READING))),
+    queue:     withIds(JSON.parse(JSON.stringify(SEED_QUEUE))),
+    completed: withIds(JSON.parse(JSON.stringify(SEED_COMPLETED))),
+    activeTab: 'reading'
+  };
+}
+
+function normalize(raw){
+  const base = defaultState();
+  if(!raw || typeof raw !== 'object') return base;
+  const out = {
+    reading:   Array.isArray(raw.reading)   ? raw.reading   : base.reading,
+    queue:     Array.isArray(raw.queue)     ? raw.queue     : base.queue,
+    completed: Array.isArray(raw.completed) ? raw.completed : base.completed,
+    activeTab: ['reading','future','completed'].includes(raw.activeTab) ? raw.activeTab : 'reading'
+  };
+  // Guarantee ids + required fields on every item
+  out.reading = out.reading.filter(x=>x&&x.title).map(x=>({
+    id:x.id||uid(), title:String(x.title),
+    status:x.status==='ended'?'ended':'ongoing',
+    isMain:!!x.isMain,
+    startDate:x.startDate===undefined?'na':x.startDate,
+    length:x.length||null, genre:x.genre||null
+  }));
+  out.queue = out.queue.filter(x=>x&&x.title).map(x=>({
+    id:x.id||uid(), title:String(x.title),
+    length:x.length||'medium', genre:x.genre||'Unknown'
+  }));
+  out.completed = out.completed.filter(x=>x&&x.title).map(x=>({
+    id:x.id||uid(), title:String(x.title),
+    date:x.date||'', startDate:x.startDate===undefined?'na':x.startDate
+  }));
+  // Exactly one main read
+  const mains = out.reading.filter(r=>r.isMain);
+  if(mains.length>1) out.reading.forEach((r,i)=>{ r.isMain = (r===mains[0]); });
+  return out;
+}
+
+function loadState(){
+  try{
+    const cur = localStorage.getItem(STORAGE_KEY);
+    if(cur) return normalize(JSON.parse(cur));
+    // one-time migration from any legacy versioned key
+    for(const k of LEGACY_KEYS){
+      const old = localStorage.getItem(k);
+      if(old){
+        const migrated = normalize(JSON.parse(old));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+        LEGACY_KEYS.forEach(x=>localStorage.removeItem(x));
+        return migrated;
+      }
+    }
+  }catch(e){ console.warn('Load failed, using seed:', e); }
+  return defaultState();
+}
+
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e){ toast('Save failed — storage full?'); }
+}
+
+let state       = loadState();
+let editMode    = false;
+let dragSrcId   = null;
+let modalCtx    = null;   // { list:'reading'|'completed'|'complete-flow', id }
+let undoTimer   = null;
+let pendingUndo = null;
+let queueQuery  = '';
+let lengthFilter= 'all';
+let compQuery   = '';
+
+/* ═══════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════ */
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function todayLocal(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function isRealDate(v){ return !!v && v !== 'na' && /^\d{4}-\d{2}-\d{2}$/.test(v); }
+
+function formatDate(d){
+  if(!isRealDate(d)) return '';
+  const [y,m,day] = d.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[+m-1]} ${+day}, ${y}`;
+}
+
+function daysBetween(a,b){
+  if(!isRealDate(a) || !isRealDate(b)) return null;
+  const ms = new Date(b+'T00:00:00') - new Date(a+'T00:00:00');
+  return Math.max(0, Math.round(ms/86400000));
+}
+
+function daysSince(d){ return daysBetween(d, todayLocal()); }
+
+function findAll(title){
+  const t = title.trim().toLowerCase();
+  const hits = [];
+  if(state.reading.some(x=>x.title.toLowerCase()===t))   hits.push('Reading');
+  if(state.queue.some(x=>x.title.toLowerCase()===t))     hits.push('Queue');
+  if(state.completed.some(x=>x.title.toLowerCase()===t)) hits.push('Completed');
+  return hits;
+}
+
+/* ══ TOAST + UNDO ══ */
+function toast(msg, undoFn){
+  const el = document.getElementById('toast');
+  const action = document.getElementById('toastAction');
+  document.getElementById('toastMsg').textContent = msg;
+  clearTimeout(undoTimer);
+
+  if(undoFn){
+    pendingUndo = undoFn;
+    action.style.display = '';
+    action.onclick = () => {
+      if(pendingUndo){ pendingUndo(); pendingUndo = null; }
+      el.classList.remove('show');
+      clearTimeout(undoTimer);
+    };
+  }else{
+    pendingUndo = null;
+    action.style.display = 'none';
+  }
+
+  el.classList.add('show');
+  undoTimer = setTimeout(()=>{ el.classList.remove('show'); pendingUndo = null; }, 5200);
+}
+
+/* ═══════════════════════════════════════════════
+   DATE MODAL
+   ═══════════════════════════════════════════════ */
+const dateModal = document.getElementById('dateModal');
+document.getElementById('modalCancelBtn').onclick = closeModal;
+document.getElementById('modalConfirmBtn').onclick = () => applyDate(document.getElementById('modalDate').value || '');
+document.getElementById('modalNaBtn').onclick     = () => applyDate('na');
+document.getElementById('modalClearBtn').onclick  = () => applyDate('');
+dateModal.onclick = e => { if(e.target === dateModal) closeModal(); };
+
+function openModal(ctx, heading, title, initial){
+  modalCtx = ctx;
+  document.getElementById('modalHeading').textContent = heading;
+  document.getElementById('modalTitle').textContent = `"${title}"`;
+  document.getElementById('modalDate').value = isRealDate(initial) ? initial : todayLocal();
+  document.getElementById('modalClearBtn').style.display = ctx.mode === 'complete' ? 'none' : '';
+  document.getElementById('modalNaBtn').style.display    = ctx.mode === 'complete' ? 'none' : '';
+  dateModal.classList.remove('hidden');
+}
+
+function closeModal(){ modalCtx = null; dateModal.classList.add('hidden'); }
+
+function applyDate(val){
+  if(!modalCtx) return;
+  const { mode, id } = modalCtx;
+
+  if(mode === 'complete'){
+    const idx = state.reading.findIndex(r=>r.id===id);
+    if(idx > -1){
+      const m = state.reading[idx];
+      state.reading.splice(idx,1);
+      state.completed.push({ id:m.id, title:m.title, date: val||todayLocal(), startDate: m.startDate });
+      saveState(); closeModal(); renderAll();
+      toast(`"${m.title}" completed`, () => {
+        state.completed = state.completed.filter(c=>c.id!==m.id);
+        state.reading.splice(idx,0,m);
+        saveState(); renderAll();
+      });
+      return;
+    }
+  }else if(mode === 'reading-start'){
+    const m = state.reading.find(r=>r.id===id);
+    if(m) m.startDate = val;
+  }else if(mode === 'completed-start'){
+    const m = state.completed.find(c=>c.id===id);
+    if(m) m.startDate = val;
+  }else if(mode === 'completed-end'){
+    const m = state.completed.find(c=>c.id===id);
+    if(m) m.date = val === 'na' ? '' : val;
+  }
+
+  saveState(); closeModal(); renderAll();
+}
+
+/* ═══════════════════════════════════════════════
+   CHIP RENDERERS
+   ═══════════════════════════════════════════════ */
+function startChip(m, mode){
+  const common = `role="button" tabindex="0" data-action="edit-start" data-id="${m.id}" data-mode="${mode}"`;
+  if(m.startDate === 'na')
+    return `<span class="start-chip na" ${common} aria-label="Start date not applicable for ${esc(m.title)}">N/A</span>`;
+  if(!isRealDate(m.startDate))
+    return `<span class="start-chip unset" ${common} aria-label="Set start date for ${esc(m.title)}">Set start date</span>`;
+  const d = daysSince(m.startDate);
+  return `<span class="start-chip" ${common} aria-label="Start date ${formatDate(m.startDate)} for ${esc(m.title)}">${formatDate(m.startDate)}${d!==null?` · ${d}d`:''}</span>`;
+}
+
+function genreChips(genre){
+  const parts = String(genre||'').split(' / ').filter(Boolean);
+  const shown = parts.slice(0,2).map(g=>`<span class="tag genre">${esc(g)}</span>`).join('');
+  const extra = parts.length > 2
+    ? `<span class="tag overflow" title="${esc(parts.slice(2).join(', '))}">+${parts.length-2}</span>`
+    : '';
+  return shown + extra;
+}
+
+/* ═══════════════════════════════════════════════
+   READING
+   ═══════════════════════════════════════════════ */
+function sortedReading(){
+  const main   = state.reading.filter(m=>m.isMain);
+  const others = state.reading.filter(m=>!m.isMain).sort((a,b)=>a.title.localeCompare(b.title));
+  return [...main, ...others];
+}
+
+function renderReading(){
+  const el = document.getElementById('list-reading');
+  const rows = sortedReading();
+
+  if(!rows.length){
+    el.innerHTML = '<div class="empty-state">Nothing reading yet</div>';
+    return;
+  }
+
+  el.innerHTML = rows.map(m=>{
+    const ended = m.status === 'ended';
+    return `
+    <div class="manga-card status-${ended?'ended':'ongoing'}${m.isMain?' is-main':''}">
+      <div class="status-dot ${ended?'ended':'ongoing'}"></div>
+      <div class="manga-info">
+        <div class="manga-title">${esc(m.title)}</div>
+        <div class="tags">
+          <span class="status-badge ${ended?'badge-ended':'badge-ongoing'}"
+                role="button" tabindex="0"
+                data-action="toggle-status" data-id="${m.id}"
+                aria-label="Status ${ended?'ended':'ongoing'} for ${esc(m.title)} — tap to toggle">${ended?'Ended':'Ongoing'}</span>
+          ${startChip(m,'reading-start')}
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn btn-blue" data-action="to-queue" data-id="${m.id}" aria-label="Move ${esc(m.title)} back to queue">↺</button>
+        <button class="card-btn btn-gold${m.isMain?' btn-pin-active':''}" data-action="pin-main" data-id="${m.id}" aria-label="${m.isMain?'Currently main read':'Set '+esc(m.title)+' as main read'}">★</button>
+        <button class="card-btn btn-green" data-action="to-complete" data-id="${m.id}" aria-label="Mark ${esc(m.title)} completed">✓</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('list-reading').addEventListener('click', e=>{
+  const t = e.target.closest('[data-action]');
+  if(!t) return;
+  const id = t.dataset.id;
+  const m  = state.reading.find(r=>r.id===id);
+  if(!m) return;
+
+  switch(t.dataset.action){
+    case 'toggle-status':
+      m.status = m.status === 'ended' ? 'ongoing' : 'ended';
+      saveState(); renderReading(); break;
+
+    case 'pin-main':
+      state.reading.forEach(r=>r.isMain=false);
+      m.isMain = true;
+      saveState(); renderReading(); break;
+
+    case 'to-queue': {
+      const idx = state.reading.indexOf(m);
+      state.reading.splice(idx,1);
+      const item = { id:m.id, title:m.title, length:m.length||'medium', genre:m.genre||'Unknown' };
+      state.queue.unshift(item);
+      saveState(); renderAll();
+      toast(`"${m.title}" moved to queue`, ()=>{
+        state.queue = state.queue.filter(q=>q.id!==m.id);
+        state.reading.splice(idx,0,m);
+        saveState(); renderAll();
+      });
+      break;
+    }
+
+    case 'to-complete':
+      openModal({mode:'complete', id}, 'Mark Completed', m.title, todayLocal());
+      break;
+
+    case 'edit-start':
+      openModal({mode:'reading-start', id}, 'Start Date', m.title, m.startDate);
+      break;
+  }
+});
+
+/* ═══════════════════════════════════════════════
+   QUEUE
+   ═══════════════════════════════════════════════ */
+function filteredQueue(){
+  const q = queueQuery.trim().toLowerCase();
+  return state.queue.filter(m=>{
+    if(lengthFilter !== 'all' && m.length !== lengthFilter) return false;
+    if(!q) return true;
+    return m.title.toLowerCase().includes(q) || String(m.genre).toLowerCase().includes(q);
+  });
+}
+
+function isFiltering(){ return queueQuery.trim() !== '' || lengthFilter !== 'all'; }
+
+function renderQueue(){
+  populatePositionSelect();
+  const el   = document.getElementById('list-future');
+  const rows = filteredQueue();
+  const label= document.getElementById('progressLabel');
+
+  label.textContent = isFiltering()
+    ? `${rows.length} of ${state.queue.length} shown`
+    : `${state.queue.length} in queue`;
+
+  // Reordering while filtered would move the wrong items — disable it.
+  const editBtn = document.getElementById('editBtn');
+  if(isFiltering() && editMode) setEditMode(false);
+  editBtn.disabled = isFiltering();
+
+  if(!rows.length){
+    el.innerHTML = `<div class="empty-state">${isFiltering()?'No matches':'Queue is empty'}</div>`;
+    return;
+  }
+
+  el.innerHTML = rows.map(m=>{
+    const pos = state.queue.indexOf(m) + 1;
+    return `
+    <div class="manga-card" draggable="true" data-id="${m.id}">
+      <div class="drag-handle" data-id="${m.id}" aria-hidden="true">⠿</div>
+      <div class="num">${pos}</div>
+      <div class="manga-info">
+        <div class="manga-title">${esc(m.title)}</div>
+        <div class="tags">
+          <span class="tag length-${esc(m.length)}">${esc(String(m.length).replace('-',' '))}</span>
+          ${genreChips(m.genre)}
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn" data-action="to-top" data-id="${m.id}" aria-label="Move ${esc(m.title)} to top of queue">⤒</button>
+        <button class="card-btn btn-blue" data-action="start" data-id="${m.id}" aria-label="Start reading ${esc(m.title)}">▶</button>
+        <button class="card-btn btn-red" data-action="remove" data-id="${m.id}" aria-label="Remove ${esc(m.title)} from queue">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  if(editMode) el.classList.add('edit-mode');
+}
+
+const queueList = document.getElementById('list-future');
+
+queueList.addEventListener('click', e=>{
+  const t = e.target.closest('[data-action]');
+  if(!t) return;
+  const id  = t.dataset.id;
+  const idx = state.queue.findIndex(q=>q.id===id);
+  if(idx < 0) return;
+  const m = state.queue[idx];
+
+  switch(t.dataset.action){
+    case 'start': {
+      state.queue.splice(idx,1);
+      const prevMain = state.reading.find(r=>r.isMain);
+      state.reading.forEach(r=>r.isMain=false);
+      const item = {
+        id:m.id, title:m.title, status:'ongoing', isMain:true,
+        startDate: todayLocal(), length:m.length, genre:m.genre
+      };
+      state.reading.push(item);
+      saveState(); renderAll();
+      toast(`Started "${m.title}"`, ()=>{
+        state.reading = state.reading.filter(r=>r.id!==m.id);
+        if(prevMain) prevMain.isMain = true;
+        state.queue.splice(idx,0,m);
+        saveState(); renderAll();
+      });
+      break;
+    }
+
+    case 'to-top':
+      if(idx === 0){ toast('Already at the top'); break; }
+      state.queue.splice(idx,1);
+      state.queue.unshift(m);
+      saveState(); renderQueue();
+      toast(`"${m.title}" moved to top`, ()=>{
+        state.queue = state.queue.filter(q=>q.id!==m.id);
+        state.queue.splice(idx,0,m);
+        saveState(); renderQueue();
+      });
+      break;
+
+    case 'remove':
+      state.queue.splice(idx,1);
+      saveState(); renderQueue(); updateStats();
+      toast(`Removed "${m.title}"`, ()=>{
+        state.queue.splice(idx,0,m);
+        saveState(); renderQueue(); updateStats();
+      });
+      break;
+  }
+});
+
+/* ══ DRAG & DROP (delegated) ══ */
+function moveById(srcId, destId){
+  if(!srcId || !destId || srcId === destId) return;
+  const from = state.queue.findIndex(q=>q.id===srcId);
+  const to   = state.queue.findIndex(q=>q.id===destId);
+  if(from < 0 || to < 0) return;
+  const [item] = state.queue.splice(from,1);
+  state.queue.splice(to,0,item);
+  saveState(); renderQueue();
+}
+
+queueList.addEventListener('dragstart', e=>{
+  const card = e.target.closest('.manga-card');
+  if(!card || !editMode){ e.preventDefault(); return; }
+  dragSrcId = card.dataset.id;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(()=>card.classList.add('dragging'),0);
+});
+
+queueList.addEventListener('dragover', e=>{
+  if(!editMode) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const card = e.target.closest('.manga-card');
+  queueList.querySelectorAll('.drag-over').forEach(c=>c.classList.remove('drag-over'));
+  if(card && card.dataset.id !== dragSrcId) card.classList.add('drag-over');
+});
+
+queueList.addEventListener('drop', e=>{
+  if(!editMode) return;
+  e.preventDefault();
+  const card = e.target.closest('.manga-card');
+  queueList.querySelectorAll('.dragging,.drag-over').forEach(c=>c.classList.remove('dragging','drag-over'));
+  if(card) moveById(dragSrcId, card.dataset.id);
+  dragSrcId = null;
+});
+
+queueList.addEventListener('dragend', ()=>{
+  queueList.querySelectorAll('.dragging,.drag-over').forEach(c=>c.classList.remove('dragging','drag-over'));
+  dragSrcId = null;
+});
+
+/* ══ TOUCH DRAG w/ edge auto-scroll ══ */
+let autoScroll = null;
+function stopAutoScroll(){ if(autoScroll){ cancelAnimationFrame(autoScroll); autoScroll = null; } }
+
+queueList.addEventListener('touchstart', e=>{
+  const h = e.target.closest('.drag-handle');
+  if(!h || !editMode) return;
+  dragSrcId = h.dataset.id;
+  const card = h.closest('.manga-card');
+  if(card) card.classList.add('dragging');
+}, {passive:true});
+
+queueList.addEventListener('touchmove', e=>{
+  if(!editMode || !dragSrcId) return;
+  e.preventDefault();
+  const y = e.touches[0].clientY;
+  const target = document.elementFromPoint(e.touches[0].clientX, y);
+  const card = target && target.closest('.manga-card');
+  queueList.querySelectorAll('.drag-over').forEach(c=>c.classList.remove('drag-over'));
+  if(card && card.dataset.id !== dragSrcId) card.classList.add('drag-over');
+
+  const margin = 90, speed = 12;
+  stopAutoScroll();
+  if(y < margin)                       autoScroll = requestAnimationFrame(function s(){ window.scrollBy(0,-speed); autoScroll = requestAnimationFrame(s); });
+  else if(y > innerHeight - margin)    autoScroll = requestAnimationFrame(function s(){ window.scrollBy(0, speed); autoScroll = requestAnimationFrame(s); });
+}, {passive:false});
+
+queueList.addEventListener('touchend', e=>{
+  if(!editMode || !dragSrcId) return;
+  stopAutoScroll();
+  const t = e.changedTouches[0];
+  const target = document.elementFromPoint(t.clientX, t.clientY);
+  const card = target && target.closest('.manga-card');
+  queueList.querySelectorAll('.dragging,.drag-over').forEach(c=>c.classList.remove('dragging','drag-over'));
+  if(card) moveById(dragSrcId, card.dataset.id);
+  dragSrcId = null;
+});
+
+/* ══ EDIT MODE ══ */
+function setEditMode(on){
+  editMode = on;
+  document.getElementById('list-future').classList.toggle('edit-mode', on);
+  const btn = document.getElementById('editBtn');
+  btn.classList.toggle('active', on);
+  btn.textContent = on ? '✓ Done' : '✎ Edit Order';
+  document.getElementById('editBanner').classList.toggle('visible', on);
+}
+document.getElementById('editBtn').onclick = ()=>{
+  if(isFiltering()){ toast('Clear filters to reorder'); return; }
+  setEditMode(!editMode);
+};
+
+/* ══ ADD FORM ══ */
+function populatePositionSelect(){
+  const sel = document.getElementById('addPosition');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="start">Start of queue</option><option value="end" selected>End of queue</option>';
+  state.queue.forEach((m,i)=>{
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = `After #${i+1}: ${m.title.length>20 ? m.title.slice(0,20)+'…' : m.title}`;
+    sel.appendChild(o);
+  });
+  if(prev && [...sel.options].some(o=>o.value===prev)) sel.value = prev;
+}
+
+function addToQueue(){
+  const titleEl = document.getElementById('addTitle');
+  const title = titleEl.value.trim();
+  if(!title) return;
+
+  const dupes = findAll(title);
+  if(dupes.length && !confirm(`"${title}" already exists in: ${dupes.join(', ')}.\n\nAdd it anyway?`)) return;
+
+  const item = {
+    id: uid(),
+    title,
+    length: document.getElementById('addLength').value,
+    genre: document.getElementById('addGenre').value.trim() || 'Unknown'
+  };
+
+  const pos = document.getElementById('addPosition').value;
+  if(pos === 'end')        state.queue.push(item);
+  else if(pos === 'start') state.queue.unshift(item);
+  else                     state.queue.splice(parseInt(pos,10)+1, 0, item);
+
+  titleEl.value = '';
+  document.getElementById('addGenre').value = '';
+  saveState(); renderQueue(); updateStats();
+  toast(`Added "${title}"`, ()=>{
+    state.queue = state.queue.filter(q=>q.id!==item.id);
+    saveState(); renderQueue(); updateStats();
+  });
+}
+
+document.getElementById('addBtn').onclick = addToQueue;
+['addTitle','addGenre'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown', e=>{ if(e.key==='Enter') addToQueue(); });
+});
+
+/* ══ QUEUE SEARCH / FILTER ══ */
+const qSearch = document.getElementById('queueSearch');
+qSearch.addEventListener('input', ()=>{
+  queueQuery = qSearch.value;
+  document.getElementById('queueSearchClear').classList.toggle('visible', !!queueQuery);
+  renderQueue();
+});
+document.getElementById('queueSearchClear').onclick = ()=>{
+  qSearch.value = ''; queueQuery = '';
+  document.getElementById('queueSearchClear').classList.remove('visible');
+  renderQueue(); qSearch.focus();
+};
+
+document.getElementById('lengthFilters').addEventListener('click', e=>{
+  const chip = e.target.closest('.fchip');
+  if(!chip) return;
+  document.querySelectorAll('#lengthFilters .fchip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  lengthFilter = chip.dataset.len;
+  renderQueue();
+});
+
+/* ═══════════════════════════════════════════════
+   COMPLETED
+   ═══════════════════════════════════════════════ */
+function sortedCompleted(){
+  const undated = state.completed.filter(m=>!isRealDate(m.date)).sort((a,b)=>a.title.localeCompare(b.title));
+  const dated   = state.completed.filter(m=>isRealDate(m.date)).sort((a,b)=>a.date.localeCompare(b.date));
+  return [...undated, ...dated];
+}
+
+function renderCompleted(){
+  const el = document.getElementById('list-completed');
+  const q  = compQuery.trim().toLowerCase();
+  const rows = sortedCompleted().filter(m=>!q || m.title.toLowerCase().includes(q));
+
+  if(!rows.length){
+    el.innerHTML = `<div class="empty-state">${q?'No matches':'Nothing completed yet'}</div>`;
+    return;
+  }
+
+  el.innerHTML = rows.map(m=>{
+    const span = daysBetween(m.startDate, m.date);
+    let line = '';
+    if(isRealDate(m.date)){
+      line = isRealDate(m.startDate)
+        ? `Started ${formatDate(m.startDate)} → Completed ${formatDate(m.date)}${span!==null?` · ${span}d`:''}`
+        : `Completed ${formatDate(m.date)}`;
+    }
+    return `
+    <div class="manga-card completed-card">
+      <div style="font-size:15px;flex-shrink:0;color:var(--green)" aria-hidden="true">✓</div>
+      <div class="manga-info">
+        <div class="manga-title">${esc(m.title)}</div>
+        ${line?`<div class="completed-date">${esc(line)}</div>`:''}
+        <div class="tags">
+          ${startChip(m,'completed-start')}
+          <span class="start-chip${isRealDate(m.date)?'':' unset'}" role="button" tabindex="0"
+                data-action="edit-end" data-id="${m.id}"
+                aria-label="Completion date for ${esc(m.title)}">${isRealDate(m.date)?'Done '+formatDate(m.date):'Set end date'}</span>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn btn-blue" data-action="back-to-reading" data-id="${m.id}" aria-label="Move ${esc(m.title)} back to reading">↺</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('list-completed').addEventListener('click', e=>{
+  const t = e.target.closest('[data-action]');
+  if(!t) return;
+  const id = t.dataset.id;
+  const idx = state.completed.findIndex(c=>c.id===id);
+  if(idx < 0) return;
+  const m = state.completed[idx];
+
+  if(t.dataset.action === 'back-to-reading'){
+    state.completed.splice(idx,1);
+    const item = { id:m.id, title:m.title, status:'ongoing', isMain:false, startDate:m.startDate };
+    state.reading.push(item);
+    saveState(); renderAll();
+    toast(`"${m.title}" moved to reading`, ()=>{
+      state.reading = state.reading.filter(r=>r.id!==m.id);
+      state.completed.splice(idx,0,m);
+      saveState(); renderAll();
+    });
+  }else if(t.dataset.action === 'edit-start'){
+    openModal({mode:'completed-start', id}, 'Start Date', m.title, m.startDate);
+  }else if(t.dataset.action === 'edit-end'){
+    openModal({mode:'completed-end', id}, 'Completion Date', m.title, m.date);
+  }
+});
+
+const cSearch = document.getElementById('compSearch');
+cSearch.addEventListener('input', ()=>{
+  compQuery = cSearch.value;
+  document.getElementById('compSearchClear').classList.toggle('visible', !!compQuery);
+  renderCompleted();
+});
+document.getElementById('compSearchClear').onclick = ()=>{
+  cSearch.value=''; compQuery='';
+  document.getElementById('compSearchClear').classList.remove('visible');
+  renderCompleted(); cSearch.focus();
+};
+
+/* ═══════════════════════════════════════════════
+   STATS + TABS
+   ═══════════════════════════════════════════════ */
+function updateStats(){
+  const r = state.reading.length, q = state.queue.length, c = state.completed.length;
+  document.getElementById('statReading').textContent   = r;
+  document.getElementById('statQueue').textContent     = q;
+  document.getElementById('statCompleted').textContent = c;
+  document.getElementById('tcReading').textContent     = r;
+  document.getElementById('tcQueue').textContent       = q;
+  document.getElementById('tcCompleted').textContent   = c;
+  document.getElementById('headerSub').textContent     = `${r+q+c} titles in your library`;
+}
+
+function switchTab(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  const btn = document.querySelector(`.tab[data-tab="${name}"]`);
+  if(btn) btn.classList.add('active');
+  state.activeTab = name;
+  saveState();
+}
+
+document.getElementById('tabs').addEventListener('click', e=>{
+  const t = e.target.closest('.tab');
+  if(t) switchTab(t.dataset.tab);
+});
+
+/* ═══════════════════════════════════════════════
+   EXPORT / IMPORT
+   ═══════════════════════════════════════════════ */
+document.getElementById('exportBtn').onclick = ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `manga-tracker-${todayLocal()}.json`;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  toast('Backup exported');
+};
+
+document.getElementById('importBtn').onclick = ()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange = e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    try{
+      const incoming = normalize(JSON.parse(fr.result));
+      if(!confirm('Replace your current library with this backup?')) return;
+      state = incoming;
+      saveState(); renderAll();
+      switchTab(state.activeTab);
+      toast('Backup restored');
+    }catch(err){ toast('Import failed — invalid file'); }
+  };
+  fr.readAsText(f);
+  e.target.value = '';
+};
+
+/* ═══════════════════════════════════════════════
+   CROSS-CONTEXT SYNC (installed app ⇄ Chrome tab)
+   ═══════════════════════════════════════════════ */
+window.addEventListener('storage', e=>{
+  if(e.key === STORAGE_KEY && e.newValue){
+    try{
+      state = normalize(JSON.parse(e.newValue));
+      renderAll(); switchTab(state.activeTab);
+      toast('Synced from another window');
+    }catch(err){}
+  }
+});
+
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState !== 'visible') return;
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw && raw !== JSON.stringify(state)){
+      state = normalize(JSON.parse(raw));
+      renderAll(); switchTab(state.activeTab);
+    }
+  }catch(err){}
+});
+
+/* ═══════════════════════════════════════════════
+   UI CHROME — scroll effects, install, SW
+   ═══════════════════════════════════════════════ */
+const toTop = document.getElementById('toTop');
+addEventListener('scroll', ()=>{
+  const y = scrollY;
+  document.body.classList.toggle('scrolled', y > 60);
+  toTop.classList.toggle('visible', y > 400);
+}, {passive:true});
+toTop.onclick = ()=>scrollTo({top:0, behavior:'smooth'});
+
+let deferredPrompt = null;
+addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBtn').classList.remove('hidden');
+});
+document.getElementById('installBtn').onclick = async ()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('installBtn').classList.add('hidden');
+};
+addEventListener('appinstalled', ()=>{
+  document.getElementById('installBtn').classList.add('hidden');
+  toast('Installed — open it from your home screen');
+});
+
+if('serviceWorker' in navigator){
+  addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      reg.addEventListener('updatefound', ()=>{
+        const nw = reg.installing;
+        if(!nw) return;
+        nw.addEventListener('statechange', ()=>{
+          if(nw.state === 'installed' && navigator.serviceWorker.controller){
+            toast('New version available', ()=>{
+              nw.postMessage({type:'SKIP_WAITING'});
+              location.reload();
+            });
+            document.getElementById('toastAction').textContent = 'Reload';
+          }
+        });
+      });
+    }).catch(()=>{});
+  });
+}
+
+if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+
+/* ═══════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════ */
+function renderAll(){
+  renderReading();
+  renderQueue();
+  renderCompleted();
+  updateStats();
+}
+
+renderAll();
+switchTab(state.activeTab || 'reading');
+</script>
+</body>
+</html>
